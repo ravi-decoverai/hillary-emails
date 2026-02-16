@@ -162,11 +162,14 @@
   }
   .label-inbox { background: #e8f0fe; color: #1967d2; }
   .label-classified { background: #fce8e6; color: #c5221f; }
-  .label-benghazi { background: #fef7e0; color: #e37400; }
+  .label-benghazi { background: #fff3e0; color: #ff6f00; }
   .label-personal-server { background: #f3e8fd; color: #8430ce; }
   .label-deleted { background: #fce8e6; color: #d93025; }
+  .label-false-statements { background: #fef7e0; color: #e37400; }
+  .label-obstruction { background: #fce8e6; color: #b71c1c; }
   .label-influence { background: #e6f4ea; color: #137333; }
   .label-foundation { background: #e0f2f1; color: #00897b; }
+  .label-spillage { background: #f3e8fd; color: #4a148c; }
 
   /* Category filter chips */
   .filter-bar {
@@ -240,36 +243,51 @@
       All Mail
     </div>
 
-    <div class="nav-section">Categories</div>
+    <div class="nav-section">Legal Categories</div>
     <div class="nav-item" data-view="cat-classified" onclick="setView('cat-classified')">
       <div class="dot" style="background:#c5221f"></div>
-      Classified Info
+      <span style="font-size:12px">§793 Classified</span>
       <span class="count" id="countClassified">0</span>
-    </div>
-    <div class="nav-item" data-view="cat-benghazi" onclick="setView('cat-benghazi')">
-      <div class="dot" style="background:#e37400"></div>
-      Benghazi
-      <span class="count" id="countBenghazi">0</span>
     </div>
     <div class="nav-item" data-view="cat-personal-server" onclick="setView('cat-personal-server')">
       <div class="dot" style="background:#8430ce"></div>
-      Private Server
+      <span style="font-size:12px">§1924 Unauth Removal</span>
       <span class="count" id="countPersonalServer">0</span>
     </div>
     <div class="nav-item" data-view="cat-deleted" onclick="setView('cat-deleted')">
       <div class="dot" style="background:#d93025"></div>
-      Deletion Concerns
+      <span style="font-size:12px">§2071 Record Destruct</span>
       <span class="count" id="countDeleted">0</span>
+    </div>
+    <div class="nav-item" data-view="cat-false-statements" onclick="setView('cat-false-statements')">
+      <div class="dot" style="background:#e37400"></div>
+      <span style="font-size:12px">§1001 False Statements</span>
+      <span class="count" id="countFalseStatements">0</span>
+    </div>
+    <div class="nav-item" data-view="cat-obstruction" onclick="setView('cat-obstruction')">
+      <div class="dot" style="background:#b71c1c"></div>
+      <span style="font-size:12px">§1505 Obstruction</span>
+      <span class="count" id="countObstruction">0</span>
+    </div>
+    <div class="nav-item" data-view="cat-benghazi" onclick="setView('cat-benghazi')">
+      <div class="dot" style="background:#ff6f00"></div>
+      <span style="font-size:12px">Benghazi</span>
+      <span class="count" id="countBenghazi">0</span>
     </div>
     <div class="nav-item" data-view="cat-influence" onclick="setView('cat-influence')">
       <div class="dot" style="background:#137333"></div>
-      Foreign Influence
+      <span style="font-size:12px">§611 FARA / Foreign</span>
       <span class="count" id="countInfluence">0</span>
     </div>
     <div class="nav-item" data-view="cat-foundation" onclick="setView('cat-foundation')">
       <div class="dot" style="background:#00897b"></div>
-      Foundation Links
+      <span style="font-size:12px">§201 Pay-to-Play</span>
       <span class="count" id="countFoundation">0</span>
+    </div>
+    <div class="nav-item" data-view="cat-spillage" onclick="setView('cat-spillage')">
+      <div class="dot" style="background:#4a148c"></div>
+      <span style="font-size:12px">Intel Spillage</span>
+      <span class="count" id="countSpillage">0</span>
     </div>
     <div class="nav-item" data-view="cat-flagged" onclick="setView('cat-flagged')" style="margin-top:8px; color:#c5221f;">
       <svg viewBox="0 0 24 24" fill="currentColor" style="color:#c5221f"><path d="M14.4 6L14 4H5v17h2v-7h5.6l.4 2h7V6z"/></svg>
@@ -325,41 +343,84 @@ let activeFilters = new Set();
 
 const colors = ['#a142f4','#1a73e8','#ea4335','#34a853','#fa7b17','#f538a0','#00897b','#e37400'];
 
-// --- Category definitions & keyword-based classification ---
+// --- Legal Category definitions & keyword-based classification ---
 const CATEGORIES = {
+  // 1. 18 U.S.C. § 793 — Mishandling Classified Information
   classified: {
-    name: 'Classified Info', color: '#c5221f', labelClass: 'label-classified',
+    name: '18 USC §793 — Classified Mishandling', color: '#c5221f', labelClass: 'label-classified',
     keywords: ['classified','confidential','secret','top secret','sensitive','noforn',
-      'unclassified','redact','b1','b6','b5','1.4(b)','1.4(d)','class: secret',
-      'declassif','intelligence','nsa','cia','dni','sigint','humint','comint']
+      'redact','b1','b6','b5','1.4(b)','1.4(d)','class: secret',
+      'declassif','intelligence','nsa','cia','dni','sigint','humint','comint',
+      'sensitive compartmented','sci','special access','sap','national defense',
+      'release in part','portion marked','derivatively classified']
   },
-  benghazi: {
-    name: 'Benghazi', color: '#e37400', labelClass: 'label-benghazi',
-    keywords: ['benghazi','libya','libyan','qaddafi','gaddafi','tripoli','stevens',
-      'ambassador stevens','consulate attack','annex','cia annex','militia']
-  },
+  // 2. 18 U.S.C. § 1924 — Unauthorized Removal of Classified Docs
   'personal-server': {
-    name: 'Private Server', color: '#8430ce', labelClass: 'label-personal-server',
+    name: '18 USC §1924 — Unauthorized Removal', color: '#8430ce', labelClass: 'label-personal-server',
     keywords: ['private server','personal email','hdr22','clintonemail','home server',
-      'personal server','blackberry','ipad','secure fax','secure phone','burn after',
+      'personal server','blackberry','ipad','secure fax','secure phone',
       'non-paper','off the record','remove heading','remove classification',
-      'send nonsecure','non-secure','unclass']
+      'send nonsecure','non-secure','unclass','unauthorized','private account',
+      'personal device','unsecured','unclassified system','state.gov']
   },
+  // 3. 18 U.S.C. § 2071 — Destruction of Federal Records
   deleted: {
-    name: 'Deletion Concerns', color: '#d93025', labelClass: 'label-deleted',
+    name: '18 USC §2071 — Record Destruction', color: '#d93025', labelClass: 'label-deleted',
     keywords: ['delete','deleted','destroy','destroyed','wipe','wiped','bleachbit',
-      'print and delete','burn','shred','remove from','get rid of','scrub']
+      'print and delete','burn','shred','remove from','get rid of','scrub',
+      'dispose','purge','erase','clean up','cover','hide','conceal',
+      'federal records','preservation','retain','retention']
   },
+  // 4. 18 U.S.C. § 1001 — False Statements
+  'false-statements': {
+    name: '18 USC §1001 — False Statements', color: '#e37400', labelClass: 'label-false-statements',
+    keywords: ['no classified','did not send','did not receive','never','deny',
+      'not aware','nothing classified','no markings','not marked',
+      'single device','one device','convenience','permitted','allowed',
+      'fully cooperat','turned over all','provided all','every email']
+  },
+  // 5. 18 U.S.C. § 1505/1519 — Obstruction of Justice
+  obstruction: {
+    name: '18 USC §1505 — Obstruction', color: '#b71c1c', labelClass: 'label-obstruction',
+    keywords: ['subpoena','congressional','committee','investigation','testimony',
+      'hearing','oversight','foia','freedom of information','inspector general',
+      'ig report','fbi','doj','grand jury','inquiry','compliance',
+      'respond to','request for','produce documents','litigation hold',
+      'preserve','spoliation']
+  },
+  // 6. Benghazi — Select Committee Investigation
+  benghazi: {
+    name: 'Benghazi Investigation', color: '#ff6f00', labelClass: 'label-benghazi',
+    keywords: ['benghazi','libya','libyan','qaddafi','gaddafi','tripoli','stevens',
+      'ambassador stevens','consulate attack','annex','cia annex','militia',
+      'special mission','compound','diplomatic security','arb','accountability review',
+      'stand down','talking points','susan rice','video','protest']
+  },
+  // 7. FARA / Foreign Influence — 22 U.S.C. § 611
   influence: {
-    name: 'Foreign Influence', color: '#137333', labelClass: 'label-influence',
+    name: '22 USC §611 — Foreign Influence (FARA)', color: '#137333', labelClass: 'label-influence',
     keywords: ['saudi','qatar','uae','bahrain','donation','donor','foreign government',
-      'foreign agent','foreign contribution','lobbying','lobby','cgep','teneo',
-      'band','doug band','huma','blumenthal','favors','favor','access']
+      'foreign agent','foreign contribution','lobbying','lobby',
+      'doug band','huma','blumenthal','favors','favor','access',
+      'prince','king','sheikh','ambassador','regime','channel',
+      'back channel','unofficial','intermediary','foreign national']
   },
+  // 8. Pay-to-Play / Conflict of Interest — 18 U.S.C. § 201
   foundation: {
-    name: 'Foundation Links', color: '#00897b', labelClass: 'label-foundation',
+    name: '18 USC §201 — Pay-to-Play / COI', color: '#00897b', labelClass: 'label-foundation',
     keywords: ['clinton foundation','cgep','clinton global','cgi','foundation',
-      'laureate','teneo','speeches','speaking fee','donors','fundrais','charitable']
+      'laureate','teneo','speeches','speaking fee','donors','fundrais','charitable',
+      'donor','contribution','quid pro quo','meeting request','appointment',
+      'introduce','connect','arrange','set up a meeting','put in touch',
+      'conflict of interest','ethics','recusal','financial disclosure']
+  },
+  // 9. Espionage Act Concerns — Spillage to Unauthorized Persons
+  spillage: {
+    name: 'Intel Spillage / Unauthorized Disclosure', color: '#4a148c', labelClass: 'label-spillage',
+    keywords: ['sid','sidney','blumenthal intel','sources','methods','operative',
+      'agent','asset','foreign intelligence','spy','covert','clandestine',
+      'tyler drumheller','intelligence community','unauthorized person',
+      'need to know','clearance','read in','compartment','special envoy']
   }
 };
 
@@ -688,11 +749,14 @@ function updateSidebarCounts() {
 
   document.getElementById('inboxCount').textContent = threadList.length;
   document.getElementById('countClassified').textContent = catCounts['classified'] || 0;
-  document.getElementById('countBenghazi').textContent = catCounts['benghazi'] || 0;
   document.getElementById('countPersonalServer').textContent = catCounts['personal-server'] || 0;
   document.getElementById('countDeleted').textContent = catCounts['deleted'] || 0;
+  document.getElementById('countFalseStatements').textContent = catCounts['false-statements'] || 0;
+  document.getElementById('countObstruction').textContent = catCounts['obstruction'] || 0;
+  document.getElementById('countBenghazi').textContent = catCounts['benghazi'] || 0;
   document.getElementById('countInfluence').textContent = catCounts['influence'] || 0;
   document.getElementById('countFoundation').textContent = catCounts['foundation'] || 0;
+  document.getElementById('countSpillage').textContent = catCounts['spillage'] || 0;
   document.getElementById('countFlagged').textContent = flaggedTotal;
 }
 
