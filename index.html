@@ -39,7 +39,7 @@
 
   /* Sidebar */
   .sidebar {
-    width: 250px; padding: 8px 12px; flex-shrink: 0; position: fixed;
+    width: 256px; padding: 8px 12px; flex-shrink: 0; position: fixed;
     top: 64px; bottom: 0; overflow-y: auto;
   }
   .compose-btn {
@@ -56,13 +56,18 @@
   }
   .nav-item:hover { background: #e8eaed; }
   .nav-item.active { background: #d3e3fd; color: #001d35; font-weight: 600; }
-  .nav-item .count {
-    margin-left: auto; font-size: 12px; font-weight: 600;
-  }
+  .nav-item .count { margin-left: auto; font-size: 12px; font-weight: 600; }
   .nav-item svg { width: 20px; height: 20px; flex-shrink: 0; }
+  .nav-section {
+    font-size: 11px; font-weight: 600; color: #5f6368; text-transform: uppercase;
+    letter-spacing: 0.8px; padding: 16px 12px 6px; margin-top: 4px;
+  }
+  .nav-item .dot {
+    width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0;
+  }
 
   /* Email List */
-  .main { flex: 1; margin-left: 250px; }
+  .main { flex: 1; margin-left: 256px; }
   .toolbar {
     display: flex; align-items: center; padding: 4px 16px; gap: 4px;
     background: #f6f8fc; border-bottom: 1px solid #e0e0e0; position: sticky;
@@ -77,26 +82,31 @@
 
   .email-list { background: #fff; }
   .email-row {
-    display: flex; align-items: center; padding: 0 16px; height: 40px;
+    display: flex; align-items: center; padding: 0 16px; height: 42px;
     border-bottom: 1px solid #f1f3f4; cursor: pointer; font-size: 14px;
     transition: box-shadow 0.15s;
   }
   .email-row:hover { box-shadow: inset 1px 0 0 #dadce0, inset -1px 0 0 #dadce0, 0 1px 2px 0 rgba(60,64,67,.3); z-index: 1; }
   .email-row.unread { font-weight: 600; background: #fff; }
   .email-row.read { background: #f2f6fc; }
-  .email-row.selected { background: #c2dbff; }
 
   .email-row .checkbox { width: 40px; flex-shrink: 0; display: flex; align-items: center; }
   .email-row .checkbox input { width: 18px; height: 18px; cursor: pointer; accent-color: #1a73e8; }
   .email-row .star { width: 32px; flex-shrink: 0; cursor: pointer; color: #dadce0; font-size: 18px; }
   .email-row .star.starred { color: #f4b400; }
   .email-row .sender { width: 200px; flex-shrink: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-  .email-row .subject-snippet { flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .email-row .subject-snippet { flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; display: flex; align-items: center; gap: 6px; }
   .email-row .subject-snippet .snippet { color: #5f6368; font-weight: 400; }
+  .email-row .thread-count {
+    background: #dadce0; color: #5f6368; font-size: 11px; font-weight: 600;
+    padding: 0 6px; border-radius: 8px; flex-shrink: 0;
+  }
+  .email-row .category-dots { display: flex; gap: 3px; flex-shrink: 0; margin-right: 4px; }
+  .email-row .category-dots .cat-dot { width: 8px; height: 8px; border-radius: 50%; }
   .email-row .date { width: 80px; text-align: right; flex-shrink: 0; font-size: 12px; color: #5f6368; }
   .email-row.unread .date { color: #202124; font-weight: 600; }
 
-  /* Email Detail View */
+  /* Email Detail / Thread View */
   .email-detail { display: none; background: #fff; min-height: calc(100vh - 112px); }
   .email-detail.active { display: block; }
   .email-list.hidden { display: none; }
@@ -113,41 +123,77 @@
   .detail-toolbar button:hover { background: #e8eaed; }
 
   .detail-content { padding: 20px 60px; max-width: 900px; }
-  .detail-subject { font-size: 22px; font-weight: 400; color: #202124; margin-bottom: 20px; line-height: 1.4; }
-  .detail-header { display: flex; align-items: flex-start; gap: 12px; margin-bottom: 24px; }
+  .detail-subject { font-size: 22px; font-weight: 400; color: #202124; margin-bottom: 20px; line-height: 1.4; display: flex; align-items: center; flex-wrap: wrap; gap: 8px; }
+
+  .thread-message {
+    border: 1px solid #e0e0e0; border-radius: 8px; margin-bottom: 8px;
+    overflow: hidden;
+  }
+  .thread-message-header {
+    display: flex; align-items: center; gap: 12px; padding: 12px 16px;
+    cursor: pointer; user-select: none;
+  }
+  .thread-message-header:hover { background: #f8f9fa; }
+  .thread-message.collapsed .thread-message-body { display: none; }
+  .thread-message.expanded { border-color: #dadce0; }
+  .thread-message.expanded .thread-message-header { border-bottom: 1px solid #e0e0e0; }
+
   .detail-avatar {
-    width: 40px; height: 40px; border-radius: 50%; background: #a142f4;
+    width: 40px; height: 40px; border-radius: 50%;
     color: #fff; display: flex; align-items: center; justify-content: center;
     font-weight: 600; font-size: 16px; flex-shrink: 0;
   }
-  .detail-meta { flex: 1; }
-  .detail-from { font-weight: 600; font-size: 14px; }
-  .detail-to { font-size: 12px; color: #5f6368; margin-top: 2px; }
-  .detail-date-full { font-size: 12px; color: #5f6368; white-space: nowrap; }
-  .detail-body {
+  .thread-meta { flex: 1; min-width: 0; }
+  .thread-from { font-weight: 600; font-size: 14px; }
+  .thread-to { font-size: 12px; color: #5f6368; margin-top: 1px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .thread-snippet { font-size: 13px; color: #5f6368; margin-top: 2px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .thread-date { font-size: 12px; color: #5f6368; white-space: nowrap; flex-shrink: 0; }
+
+  .thread-message-body {
+    padding: 16px 16px 16px 68px;
     font-size: 14px; line-height: 1.6; color: #202124;
     white-space: pre-wrap; word-wrap: break-word;
   }
 
-  /* Labels */
+  /* Category Labels */
   .label {
-    display: inline-block; padding: 2px 8px; border-radius: 4px;
-    font-size: 11px; font-weight: 600; margin-left: 8px; vertical-align: middle;
+    display: inline-flex; align-items: center; padding: 2px 8px; border-radius: 4px;
+    font-size: 11px; font-weight: 600; white-space: nowrap;
   }
   .label-inbox { background: #e8f0fe; color: #1967d2; }
+  .label-classified { background: #fce8e6; color: #c5221f; }
+  .label-benghazi { background: #fef7e0; color: #e37400; }
+  .label-personal-server { background: #f3e8fd; color: #8430ce; }
+  .label-deleted { background: #fce8e6; color: #d93025; }
+  .label-influence { background: #e6f4ea; color: #137333; }
+  .label-foundation { background: #e0f2f1; color: #00897b; }
 
-  /* No selection */
+  /* Category filter chips */
+  .filter-bar {
+    display: flex; align-items: center; gap: 8px; padding: 8px 16px;
+    background: #f6f8fc; border-bottom: 1px solid #e0e0e0; flex-wrap: wrap;
+  }
+  .filter-chip {
+    display: inline-flex; align-items: center; gap: 4px; padding: 6px 14px;
+    border-radius: 20px; border: 1px solid #dadce0; background: #fff;
+    font-size: 13px; cursor: pointer; transition: all 0.15s; user-select: none;
+  }
+  .filter-chip:hover { background: #f1f3f4; }
+  .filter-chip.active { border-color: transparent; color: #fff; font-weight: 600; }
+  .filter-chip .chip-dot { width: 8px; height: 8px; border-radius: 50%; }
+  .filter-chip .chip-count { font-size: 11px; opacity: 0.8; }
+
   .empty-state {
     display: flex; flex-direction: column; align-items: center; justify-content: center;
     height: 300px; color: #5f6368; font-size: 14px;
   }
 
-  /* Responsive */
   @media (max-width: 768px) {
     .sidebar { display: none; }
     .main { margin-left: 0; }
     .email-row .sender { width: 120px; }
     .detail-content { padding: 16px; }
+    .thread-message-body { padding: 12px; }
   }
 </style>
 </head>
@@ -172,7 +218,6 @@
   </div>
 </div>
 
-<!-- Container -->
 <div class="container">
   <!-- Sidebar -->
   <div class="sidebar">
@@ -180,25 +225,61 @@
       <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14M5 12h14"/></svg>
       Compose
     </button>
-    <div class="nav-item active" onclick="showInbox()">
+    <div class="nav-item active" data-view="inbox" onclick="setView('inbox')">
       <svg viewBox="0 0 24 24" fill="currentColor"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 16H5v-3h3.56c.69 1.19 1.97 2 3.45 2s2.75-.81 3.45-2H19v3zm0-5h-4.99c0 1.1-.9 2-2 2s-2-.9-2-2H5V5h14v9z"/></svg>
       Inbox
       <span class="count" id="inboxCount"></span>
     </div>
-    <div class="nav-item" onclick="showStarred()">
+    <div class="nav-item" data-view="starred" onclick="setView('starred')">
       <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"/></svg>
       Starred
       <span class="count" id="starredCount">0</span>
     </div>
-    <div class="nav-item">
+    <div class="nav-item" data-view="all" onclick="setView('all')">
       <svg viewBox="0 0 24 24" fill="currentColor"><path d="M20 4H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 14H4V8l8 5 8-5v10zm-8-7L4 6h16l-8 5z"/></svg>
       All Mail
     </div>
+
+    <div class="nav-section">Categories</div>
+    <div class="nav-item" data-view="cat-classified" onclick="setView('cat-classified')">
+      <div class="dot" style="background:#c5221f"></div>
+      Classified Info
+      <span class="count" id="countClassified">0</span>
+    </div>
+    <div class="nav-item" data-view="cat-benghazi" onclick="setView('cat-benghazi')">
+      <div class="dot" style="background:#e37400"></div>
+      Benghazi
+      <span class="count" id="countBenghazi">0</span>
+    </div>
+    <div class="nav-item" data-view="cat-personal-server" onclick="setView('cat-personal-server')">
+      <div class="dot" style="background:#8430ce"></div>
+      Private Server
+      <span class="count" id="countPersonalServer">0</span>
+    </div>
+    <div class="nav-item" data-view="cat-deleted" onclick="setView('cat-deleted')">
+      <div class="dot" style="background:#d93025"></div>
+      Deletion Concerns
+      <span class="count" id="countDeleted">0</span>
+    </div>
+    <div class="nav-item" data-view="cat-influence" onclick="setView('cat-influence')">
+      <div class="dot" style="background:#137333"></div>
+      Foreign Influence
+      <span class="count" id="countInfluence">0</span>
+    </div>
+    <div class="nav-item" data-view="cat-foundation" onclick="setView('cat-foundation')">
+      <div class="dot" style="background:#00897b"></div>
+      Foundation Links
+      <span class="count" id="countFoundation">0</span>
+    </div>
+    <div class="nav-item" data-view="cat-flagged" onclick="setView('cat-flagged')" style="margin-top:8px; color:#c5221f;">
+      <svg viewBox="0 0 24 24" fill="currentColor" style="color:#c5221f"><path d="M14.4 6L14 4H5v17h2v-7h5.6l.4 2h7V6z"/></svg>
+      All Flagged
+      <span class="count" id="countFlagged">0</span>
+    </div>
   </div>
 
-  <!-- Main Content -->
+  <!-- Main -->
   <div class="main">
-    <!-- Toolbar -->
     <div class="toolbar" id="listToolbar">
       <button title="Select" onclick="toggleSelectAll()">
         <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 16H5V5h14v14z"/></svg>
@@ -209,10 +290,13 @@
       <span class="page-info" id="pageInfo"></span>
     </div>
 
-    <!-- Email List -->
+    <!-- Filter chips bar -->
+    <div class="filter-bar" id="filterBar">
+      <span style="font-size:12px;color:#5f6368;margin-right:4px;">Filter:</span>
+    </div>
+
     <div class="email-list" id="emailList"></div>
 
-    <!-- Email Detail -->
     <div class="email-detail" id="emailDetail">
       <div class="detail-toolbar">
         <button title="Back to inbox" onclick="closeDetail()">
@@ -232,11 +316,67 @@
 
 <script>
 let emails = [];
+let threads = {};       // threadKey -> array of emails sorted by date
+let threadList = [];     // array of thread objects for display
 let starredIds = new Set();
 let readIds = new Set();
 let currentView = 'inbox';
+let activeFilters = new Set();
 
 const colors = ['#a142f4','#1a73e8','#ea4335','#34a853','#fa7b17','#f538a0','#00897b','#e37400'];
+
+// --- Category definitions & keyword-based classification ---
+const CATEGORIES = {
+  classified: {
+    name: 'Classified Info', color: '#c5221f', labelClass: 'label-classified',
+    keywords: ['classified','confidential','secret','top secret','sensitive','noforn',
+      'unclassified','redact','b1','b6','b5','1.4(b)','1.4(d)','class: secret',
+      'declassif','intelligence','nsa','cia','dni','sigint','humint','comint']
+  },
+  benghazi: {
+    name: 'Benghazi', color: '#e37400', labelClass: 'label-benghazi',
+    keywords: ['benghazi','libya','libyan','qaddafi','gaddafi','tripoli','stevens',
+      'ambassador stevens','consulate attack','annex','cia annex','militia']
+  },
+  'personal-server': {
+    name: 'Private Server', color: '#8430ce', labelClass: 'label-personal-server',
+    keywords: ['private server','personal email','hdr22','clintonemail','home server',
+      'personal server','blackberry','ipad','secure fax','secure phone','burn after',
+      'non-paper','off the record','remove heading','remove classification',
+      'send nonsecure','non-secure','unclass']
+  },
+  deleted: {
+    name: 'Deletion Concerns', color: '#d93025', labelClass: 'label-deleted',
+    keywords: ['delete','deleted','destroy','destroyed','wipe','wiped','bleachbit',
+      'print and delete','burn','shred','remove from','get rid of','scrub']
+  },
+  influence: {
+    name: 'Foreign Influence', color: '#137333', labelClass: 'label-influence',
+    keywords: ['saudi','qatar','uae','bahrain','donation','donor','foreign government',
+      'foreign agent','foreign contribution','lobbying','lobby','cgep','teneo',
+      'band','doug band','huma','blumenthal','favors','favor','access']
+  },
+  foundation: {
+    name: 'Foundation Links', color: '#00897b', labelClass: 'label-foundation',
+    keywords: ['clinton foundation','cgep','clinton global','cgi','foundation',
+      'laureate','teneo','speeches','speaking fee','donors','fundrais','charitable']
+  }
+};
+
+function classifyEmail(email) {
+  const text = ((email.MetadataSubject || '') + ' ' + (email.ExtractedBodyText || '')).toLowerCase();
+  const cats = [];
+  for (const [key, cat] of Object.entries(CATEGORIES)) {
+    if (cat.keywords.some(kw => text.includes(kw))) {
+      cats.push(key);
+    }
+  }
+  return cats;
+}
+
+function normalizeSubject(s) {
+  return (s || '').replace(/^(re|fw|fwd)\s*:\s*/gi, '').trim().toLowerCase();
+}
 
 function getInitials(name) {
   if (!name) return '?';
@@ -271,120 +411,289 @@ function formatDateFull(dateStr) {
   if (!dateStr) return '';
   try {
     const d = new Date(dateStr);
-    return d.toLocaleDateString('en-US', { weekday: 'short', year: 'numeric', month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' });
+    return d.toLocaleDateString('en-US', { weekday:'short', year:'numeric', month:'short', day:'numeric', hour:'numeric', minute:'2-digit' });
   } catch { return dateStr; }
 }
 
 function getSnippet(body) {
   if (!body) return '';
   const clean = body.replace(/\n/g, ' ').replace(/\s+/g, ' ').trim();
-  return clean.length > 100 ? clean.substring(0, 100) + '...' : clean;
+  return clean.length > 80 ? clean.substring(0, 80) + '...' : clean;
+}
+
+function escHtml(str) {
+  const div = document.createElement('div');
+  div.textContent = str || '';
+  return div.innerHTML;
+}
+
+function buildThreads() {
+  threads = {};
+  emails.forEach(e => {
+    e._categories = classifyEmail(e);
+    const key = normalizeSubject(e.MetadataSubject);
+    if (!threads[key]) threads[key] = [];
+    threads[key].push(e);
+  });
+
+  // Sort each thread chronologically
+  for (const key in threads) {
+    threads[key].sort((a, b) => new Date(a.MetadataDateSent || 0) - new Date(b.MetadataDateSent || 0));
+  }
+
+  // Build thread list sorted by latest message date
+  threadList = Object.entries(threads).map(([key, msgs]) => {
+    const latest = msgs[msgs.length - 1];
+    const allCats = new Set();
+    msgs.forEach(m => m._categories.forEach(c => allCats.add(c)));
+    const senders = [...new Set(msgs.map(m => formatSender(m.MetadataFrom || m.ExtractedFrom || 'Unknown')))];
+    return {
+      key,
+      messages: msgs,
+      subject: latest.MetadataSubject || '(no subject)',
+      latestDate: latest.MetadataDateSent,
+      senders,
+      categories: [...allCats],
+      latestId: latest.Id,
+      snippet: getSnippet(latest.ExtractedBodyText)
+    };
+  }).sort((a, b) => new Date(b.latestDate || 0) - new Date(a.latestDate || 0));
+}
+
+function getVisibleThreads() {
+  let list = threadList;
+  const query = document.getElementById('searchInput').value.toLowerCase();
+
+  // View filter
+  if (currentView === 'starred') {
+    list = list.filter(t => t.messages.some(m => starredIds.has(m.Id)));
+  } else if (currentView.startsWith('cat-')) {
+    const cat = currentView.replace('cat-', '');
+    if (cat === 'flagged') {
+      list = list.filter(t => t.categories.length > 0);
+    } else {
+      list = list.filter(t => t.categories.includes(cat));
+    }
+  }
+
+  // Active filter chips
+  if (activeFilters.size > 0) {
+    list = list.filter(t => {
+      for (const f of activeFilters) {
+        if (!t.categories.includes(f)) return false;
+      }
+      return true;
+    });
+  }
+
+  // Search
+  if (query) {
+    list = list.filter(t => t.messages.some(m =>
+      (m.MetadataSubject || '').toLowerCase().includes(query) ||
+      (m.MetadataFrom || '').toLowerCase().includes(query) ||
+      (m.MetadataTo || '').toLowerCase().includes(query) ||
+      (m.ExtractedBodyText || '').toLowerCase().includes(query)
+    ));
+  }
+
+  return list;
+}
+
+function renderFilterChips() {
+  const bar = document.getElementById('filterBar');
+  const catCounts = {};
+  threadList.forEach(t => t.categories.forEach(c => { catCounts[c] = (catCounts[c]||0) + 1; }));
+
+  let html = '<span style="font-size:12px;color:#5f6368;margin-right:4px;">Filter:</span>';
+  for (const [key, cat] of Object.entries(CATEGORIES)) {
+    const count = catCounts[key] || 0;
+    if (count === 0) continue;
+    const isActive = activeFilters.has(key);
+    html += `<div class="filter-chip ${isActive ? 'active' : ''}"
+      style="${isActive ? 'background:'+cat.color+';border-color:'+cat.color : ''}"
+      onclick="toggleFilter('${key}')">
+      <div class="chip-dot" style="background:${isActive ? '#fff' : cat.color}"></div>
+      ${cat.name} <span class="chip-count">(${count})</span>
+    </div>`;
+  }
+  bar.innerHTML = html;
+}
+
+function toggleFilter(cat) {
+  if (activeFilters.has(cat)) activeFilters.delete(cat);
+  else activeFilters.add(cat);
+  renderFilterChips();
+  renderEmailList(getVisibleThreads());
 }
 
 function renderEmailList(list) {
   const el = document.getElementById('emailList');
   if (list.length === 0) {
-    el.innerHTML = '<div class="empty-state"><p>No emails match your search.</p></div>';
+    el.innerHTML = '<div class="empty-state"><p>No emails match your criteria.</p></div>';
     document.getElementById('pageInfo').textContent = '';
     return;
   }
-  document.getElementById('pageInfo').textContent = `1\u2013${list.length} of ${list.length}`;
 
-  el.innerHTML = list.map((e, i) => {
-    const isRead = readIds.has(e.Id);
-    const isStarred = starredIds.has(e.Id);
-    const sender = formatSender(e.MetadataFrom || e.ExtractedFrom || 'Unknown');
+  const totalMsgs = list.reduce((s, t) => s + t.messages.length, 0);
+  document.getElementById('pageInfo').textContent = `${list.length} conversations (${totalMsgs} messages)`;
+
+  el.innerHTML = list.map(t => {
+    const latest = t.messages[t.messages.length - 1];
+    const isRead = t.messages.every(m => readIds.has(m.Id));
+    const isStarred = t.messages.some(m => starredIds.has(m.Id));
+    const senderDisplay = t.senders.length > 2
+      ? t.senders.slice(0, 2).join(', ') + ' +' + (t.senders.length - 2)
+      : t.senders.join(', ');
+
+    const catDots = t.categories.map(c =>
+      `<div class="cat-dot" style="background:${CATEGORIES[c].color}" title="${CATEGORIES[c].name}"></div>`
+    ).join('');
+
+    const threadBadge = t.messages.length > 1
+      ? `<span class="thread-count">${t.messages.length}</span>` : '';
+
     return `
-      <div class="email-row ${isRead ? 'read' : 'unread'}" data-id="${e.Id}" onclick="openEmail(${e.Id})">
+      <div class="email-row ${isRead ? 'read' : 'unread'}" onclick="openThread('${escAttr(t.key)}')">
         <div class="checkbox"><input type="checkbox" onclick="event.stopPropagation()"></div>
-        <div class="star ${isStarred ? 'starred' : ''}" onclick="event.stopPropagation(); toggleStar(${e.Id})">
+        <div class="star ${isStarred ? 'starred' : ''}" onclick="event.stopPropagation(); toggleStarThread('${escAttr(t.key)}')">
           ${isStarred ? '&#9733;' : '&#9734;'}
         </div>
-        <div class="sender">${escHtml(sender)}</div>
+        <div class="sender">${escHtml(senderDisplay)}</div>
+        <div class="category-dots">${catDots}</div>
         <div class="subject-snippet">
-          ${escHtml(e.MetadataSubject || '(no subject)')}
-          <span class="snippet"> &mdash; ${escHtml(getSnippet(e.ExtractedBodyText))}</span>
+          <span>${escHtml(t.subject)}</span>
+          ${threadBadge}
+          <span class="snippet"> &mdash; ${escHtml(t.snippet)}</span>
         </div>
-        <div class="date">${formatDate(e.MetadataDateSent)}</div>
+        <div class="date">${formatDate(t.latestDate)}</div>
       </div>`;
   }).join('');
 }
 
-function escHtml(str) {
-  const div = document.createElement('div');
-  div.textContent = str;
-  return div.innerHTML;
+function escAttr(str) {
+  return str.replace(/'/g, "\\'").replace(/"/g, '&quot;');
 }
 
-function openEmail(id) {
-  const email = emails.find(e => e.Id === id);
-  if (!email) return;
-  readIds.add(id);
+function openThread(key) {
+  const thread = threads[key];
+  if (!thread || thread.length === 0) return;
 
-  const sender = formatSender(email.MetadataFrom || 'Unknown');
-  const initials = getInitials(sender);
-  const color = getColor(sender);
+  // Mark all as read
+  thread.forEach(m => readIds.add(m.Id));
+
+  const subject = thread[thread.length - 1].MetadataSubject || '(no subject)';
+  const allCats = new Set();
+  thread.forEach(m => m._categories.forEach(c => allCats.add(c)));
+
+  const catLabels = [...allCats].map(c =>
+    `<span class="label ${CATEGORIES[c].labelClass}">${CATEGORIES[c].name}</span>`
+  ).join('');
+
+  const messagesHtml = thread.map((m, i) => {
+    const sender = formatSender(m.MetadataFrom || m.ExtractedFrom || 'Unknown');
+    const initials = getInitials(sender);
+    const color = getColor(sender);
+    const isLast = i === thread.length - 1;
+    const collapsed = !isLast && thread.length > 1;
+
+    return `
+      <div class="thread-message ${collapsed ? 'collapsed' : 'expanded'}" onclick="toggleMessage(this, event)">
+        <div class="thread-message-header">
+          <div class="detail-avatar" style="background:${color}">${initials}</div>
+          <div class="thread-meta">
+            <div class="thread-from">${escHtml(sender)}</div>
+            ${collapsed
+              ? `<div class="thread-snippet">${escHtml(getSnippet(m.ExtractedBodyText))}</div>`
+              : `<div class="thread-to">to ${escHtml(m.MetadataTo || 'me')}</div>`
+            }
+          </div>
+          <div class="thread-date">${formatDateFull(m.MetadataDateSent)}</div>
+        </div>
+        <div class="thread-message-body">${escHtml(m.ExtractedBodyText || '')}</div>
+      </div>`;
+  }).join('');
 
   document.getElementById('detailContent').innerHTML = `
-    <div class="detail-subject">${escHtml(email.MetadataSubject || '(no subject)')}<span class="label label-inbox">Inbox</span></div>
-    <div class="detail-header">
-      <div class="detail-avatar" style="background:${color}">${initials}</div>
-      <div class="detail-meta">
-        <div class="detail-from">${escHtml(sender)}</div>
-        <div class="detail-to">to ${escHtml(email.MetadataTo || 'me')}</div>
-      </div>
-      <div class="detail-date-full">${formatDateFull(email.MetadataDateSent)}</div>
+    <div class="detail-subject">
+      ${escHtml(subject)}
+      <span class="label label-inbox">Inbox</span>
+      ${catLabels}
     </div>
-    <div class="detail-body">${escHtml(email.ExtractedBodyText || '')}</div>
+    <div style="font-size:12px;color:#5f6368;margin-bottom:16px;">${thread.length} message${thread.length > 1 ? 's' : ''} in this conversation</div>
+    ${messagesHtml}
   `;
 
   document.getElementById('emailList').classList.add('hidden');
   document.getElementById('listToolbar').style.display = 'none';
+  document.getElementById('filterBar').style.display = 'none';
   document.getElementById('emailDetail').classList.add('active');
+}
 
-  renderEmailList(getFilteredEmails());
+function toggleMessage(el, event) {
+  // Don't toggle if clicking inside the body
+  if (event.target.closest('.thread-message-body')) return;
+  const wasCollapsed = el.classList.contains('collapsed');
+  el.classList.toggle('collapsed');
+  el.classList.toggle('expanded');
+
+  // Update snippet/to display
+  if (wasCollapsed) {
+    const toEl = el.querySelector('.thread-snippet');
+    if (toEl) {
+      const from = el.querySelector('.thread-from').textContent;
+      toEl.outerHTML = `<div class="thread-to">to me</div>`;
+    }
+  }
 }
 
 function closeDetail() {
   document.getElementById('emailDetail').classList.remove('active');
   document.getElementById('emailList').classList.remove('hidden');
   document.getElementById('listToolbar').style.display = '';
-  renderEmailList(getFilteredEmails());
+  document.getElementById('filterBar').style.display = '';
+  renderEmailList(getVisibleThreads());
 }
 
-function toggleStar(id) {
-  if (starredIds.has(id)) starredIds.delete(id);
-  else starredIds.add(id);
+function toggleStarThread(key) {
+  const thread = threads[key];
+  if (!thread) return;
+  const anyStarred = thread.some(m => starredIds.has(m.Id));
+  thread.forEach(m => {
+    if (anyStarred) starredIds.delete(m.Id);
+    else starredIds.add(m.Id);
+  });
   document.getElementById('starredCount').textContent = starredIds.size;
-  renderEmailList(getFilteredEmails());
+  renderEmailList(getVisibleThreads());
 }
 
-function getFilteredEmails() {
-  const query = document.getElementById('searchInput').value.toLowerCase();
-  let list = currentView === 'starred' ? emails.filter(e => starredIds.has(e.Id)) : emails;
-  if (query) {
-    list = list.filter(e =>
-      (e.MetadataSubject || '').toLowerCase().includes(query) ||
-      (e.MetadataFrom || '').toLowerCase().includes(query) ||
-      (e.MetadataTo || '').toLowerCase().includes(query) ||
-      (e.ExtractedBodyText || '').toLowerCase().includes(query)
-    );
-  }
-  return list;
+function setView(view) {
+  currentView = view;
+  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+  const el = document.querySelector(`.nav-item[data-view="${view}"]`);
+  if (el) el.classList.add('active');
+  activeFilters.clear();
+  renderFilterChips();
+  closeDetail();
 }
 
-function filterEmails() { renderEmailList(getFilteredEmails()); }
-function showInbox() {
-  currentView = 'inbox';
-  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
-  document.querySelectorAll('.nav-item')[1].classList.add('active');
-  closeDetail();
-}
-function showStarred() {
-  currentView = 'starred';
-  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
-  document.querySelectorAll('.nav-item')[2].classList.add('active');
-  closeDetail();
+function filterEmails() { renderEmailList(getVisibleThreads()); }
+
+function updateSidebarCounts() {
+  const catCounts = {};
+  let flaggedTotal = 0;
+  threadList.forEach(t => {
+    t.categories.forEach(c => { catCounts[c] = (catCounts[c]||0) + 1; });
+    if (t.categories.length > 0) flaggedTotal++;
+  });
+
+  document.getElementById('inboxCount').textContent = threadList.length;
+  document.getElementById('countClassified').textContent = catCounts['classified'] || 0;
+  document.getElementById('countBenghazi').textContent = catCounts['benghazi'] || 0;
+  document.getElementById('countPersonalServer').textContent = catCounts['personal-server'] || 0;
+  document.getElementById('countDeleted').textContent = catCounts['deleted'] || 0;
+  document.getElementById('countInfluence').textContent = catCounts['influence'] || 0;
+  document.getElementById('countFoundation').textContent = catCounts['foundation'] || 0;
+  document.getElementById('countFlagged').textContent = flaggedTotal;
 }
 
 // Load data
@@ -392,13 +701,13 @@ fetch('emails.json')
   .then(r => r.json())
   .then(data => {
     emails = data.sort((a, b) => new Date(b.MetadataDateSent || 0) - new Date(a.MetadataDateSent || 0));
-    // Mark ~60% as read for realism
     emails.slice(Math.floor(emails.length * 0.4)).forEach(e => readIds.add(e.Id));
-    document.getElementById('inboxCount').textContent = emails.filter(e => !readIds.has(e.Id)).length;
-    renderEmailList(emails);
+    buildThreads();
+    updateSidebarCounts();
+    renderFilterChips();
+    renderEmailList(getVisibleThreads());
   });
 
-// Keyboard shortcut
 document.addEventListener('keydown', e => {
   if (e.key === 'Escape') closeDetail();
 });
