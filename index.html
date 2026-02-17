@@ -217,6 +217,8 @@
     <input type="text" id="searchInput" placeholder="Search mail" oninput="filterEmails()">
   </div>
   <div class="header-right">
+    <a href="wiki.html" style="color:#0645ad;font-size:14px;text-decoration:none;margin-right:12px;font-weight:500;">People Wiki</a>
+    <a href="stats.html" style="color:#0645ad;font-size:14px;text-decoration:none;margin-right:12px;font-weight:500;">Stats</a>
     <div class="avatar">HC</div>
   </div>
 </div>
@@ -294,6 +296,12 @@
       All Flagged
       <span class="count" id="countFlagged">0</span>
     </div>
+
+    <div class="nav-section">People</div>
+    <input type="text" id="peopleFilter" placeholder="Filter people..."
+      oninput="filterPeopleList()"
+      style="width:calc(100% - 24px);margin:0 12px 8px;padding:5px 10px;border:1px solid #dadce0;border-radius:16px;font-size:12px;outline:none;">
+    <div id="peopleNav" style="max-height:240px;overflow-y:auto;"></div>
   </div>
 
   <!-- Main -->
@@ -435,6 +443,108 @@ function classifyEmail(email) {
   return cats;
 }
 
+let personFilter = null; // currently selected person name
+let peopleCounts = {};   // person -> email count
+
+const KNOWN_NAMES = {
+  'h': 'Hillary Clinton', 'hrod17': 'Hillary Clinton',
+  'abedinh': 'Huma Abedin', 'abedin, huma': 'Huma Abedin', 'huma abedin': 'Huma Abedin',
+  'millscd': 'Cheryl Mills', 'mills, cheryl d': 'Cheryl Mills', 'mills, cheryl 0': 'Cheryl Mills', 'cheryl.mills': 'Cheryl Mills',
+  'sullivanjj': 'Jake Sullivan', 'sullivan, jacob j': 'Jake Sullivan', 'sullivan, jacobi': 'Jake Sullivan', 'jake.sullivan': 'Jake Sullivan',
+  'jilotylc': 'Lauren Jiloty',
+  'valmorolj': 'Lona Valmoro', 'valmorou': 'Lona Valmoro',
+  'hanleymr': 'Monica Hanley', 'hanley, monica r': 'Monica Hanley',
+  'preines': 'Philippe Reines', 'reines, philippe i': 'Philippe Reines', 'reinesp': 'Philippe Reines',
+  'blumenthal, sidney': 'Sidney Blumenthal', 'sidney blumenthal': 'Sidney Blumenthal', 'sbwhoeop': 'Sidney Blumenthal',
+  'russorv': 'Robert Russo', 'schwerin, daniel b': 'Daniel Schwerin',
+  'muscatinel': 'Lissa Muscatine', 'kennedy, patrick f': 'Patrick Kennedy',
+  'slaughter, anne-marie': 'Anne-Marie Slaughter', 'steinbergjb': 'James Steinberg',
+  'toiv, nora f': 'Nora Toiv', 'verveerms': 'Melanne Verveer', 'pverveer': 'Melanne Verveer',
+  'marshall, capricia p': 'Capricia Marshall', 'sherman, wendy r': 'Wendy Sherman',
+  'crowleypj': 'Philip Crowley', 'oscar flores': 'Oscar Flores',
+  'coleman, claire l': 'Claire Coleman',
+};
+
+function resolvePersonName(raw) {
+  if (!raw) return null;
+  let name = raw.split('<')[0].replace(/"/g, '').replace(/'/g, '').trim();
+  if (!name || name.length < 2) return null;
+  const lower = name.toLowerCase();
+  if (KNOWN_NAMES[lower]) return KNOWN_NAMES[lower];
+  for (const [key, val] of Object.entries(KNOWN_NAMES)) {
+    if (lower.includes(key) || key.includes(lower)) return val;
+  }
+  if (name.includes('@')) {
+    const user = name.split('@')[0].toLowerCase();
+    if (KNOWN_NAMES[user]) return KNOWN_NAMES[user];
+    return null;
+  }
+  if (name.includes(',')) {
+    const parts = name.split(',').map(s => s.trim());
+    if (parts.length === 2 && parts[1]) name = parts[1] + ' ' + parts[0];
+  }
+  return name.length > 2 ? name : null;
+}
+
+function emailInvolvesPerson(e, personName) {
+  const fields = [e.MetadataFrom, e.MetadataTo, e.ExtractedFrom, e.ExtractedTo, e.ExtractedCc];
+  for (const f of fields) {
+    if (!f) continue;
+    const parts = f.split(/[;]/);
+    for (const p of parts) {
+      const resolved = resolvePersonName(p.trim());
+      if (resolved === personName) return true;
+    }
+    // Also check if 'H' maps to Hillary Clinton
+    if (f.trim() === 'H' && personName === 'Hillary Clinton') return true;
+  }
+  return false;
+}
+
+function buildPeopleCounts() {
+  peopleCounts = {};
+  emails.forEach(e => {
+    const fields = [e.MetadataFrom, e.MetadataTo, e.ExtractedFrom, e.ExtractedTo, e.ExtractedCc];
+    const seen = new Set();
+    fields.forEach(f => {
+      if (!f) return;
+      f.split(/[;]/).forEach(part => {
+        const name = resolvePersonName(part.trim());
+        if (name && !seen.has(name)) { seen.add(name); peopleCounts[name] = (peopleCounts[name] || 0) + 1; }
+      });
+      if (f.trim() === 'H' && !seen.has('Hillary Clinton')) { seen.add('Hillary Clinton'); peopleCounts['Hillary Clinton'] = (peopleCounts['Hillary Clinton'] || 0) + 1; }
+    });
+  });
+}
+
+function renderPeopleNav(filter) {
+  const q = (filter || '').toLowerCase();
+  const sorted = Object.entries(peopleCounts).sort((a, b) => b[1] - a[1]);
+  const filtered = q ? sorted.filter(([name]) => name.toLowerCase().includes(q)) : sorted.slice(0, 30);
+
+  const nav = document.getElementById('peopleNav');
+  nav.innerHTML = filtered.map(([name, count]) => {
+    const isActive = personFilter === name;
+    const initial = name[0].toUpperCase();
+    return `
+      <div class="nav-item ${isActive ? 'active' : ''}" onclick="setPersonFilter('${name.replace(/'/g, "\\'")}')">
+        <div class="dot" style="background:${getColor(name)};width:8px;height:8px;font-size:0;"></div>
+        <span style="font-size:12px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${name}</span>
+        <span class="count">${count}</span>
+      </div>`;
+  }).join('');
+}
+
+function filterPeopleList() {
+  renderPeopleNav(document.getElementById('peopleFilter').value);
+}
+
+function setPersonFilter(name) {
+  if (personFilter === name) { personFilter = null; } else { personFilter = name; }
+  renderPeopleNav(document.getElementById('peopleFilter').value);
+  renderEmailList(getVisibleThreads());
+}
+
 function normalizeSubject(s) {
   return (s || '').replace(/^(re|fw|fwd)\s*:\s*/gi, '').trim().toLowerCase();
 }
@@ -545,6 +655,11 @@ function getVisibleThreads() {
       }
       return true;
     });
+  }
+
+  // Person filter
+  if (personFilter) {
+    list = list.filter(t => t.messages.some(m => emailInvolvesPerson(m, personFilter)));
   }
 
   // Search
@@ -767,8 +882,10 @@ fetch('emails.json')
     emails = data.sort((a, b) => new Date(b.MetadataDateSent || 0) - new Date(a.MetadataDateSent || 0));
     emails.slice(Math.floor(emails.length * 0.4)).forEach(e => readIds.add(e.Id));
     buildThreads();
+    buildPeopleCounts();
     updateSidebarCounts();
     renderFilterChips();
+    renderPeopleNav('');
     renderEmailList(getVisibleThreads());
   });
 

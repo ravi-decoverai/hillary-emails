@@ -1,0 +1,1004 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>HRC Email Archive — People Wiki</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { font-family: -apple-system, 'Segoe UI', Roboto, sans-serif; background: #f8f9fa; color: #202122; line-height: 1.6; }
+
+  /* Wiki Header */
+  .wiki-header {
+    background: #fff; border-bottom: 1px solid #a7d7f9; padding: 0;
+  }
+  .wiki-header-inner {
+    max-width: 1200px; margin: 0 auto; padding: 12px 24px;
+    display: flex; align-items: center; justify-content: space-between;
+  }
+  .wiki-logo { display: flex; align-items: center; gap: 12px; text-decoration: none; color: #202122; }
+  .wiki-logo svg { width: 48px; height: 48px; }
+  .wiki-logo-text { font-size: 20px; font-weight: 400; }
+  .wiki-logo-text strong { font-weight: 700; }
+  .wiki-nav { display: flex; gap: 20px; font-size: 13px; }
+  .wiki-nav a { color: #0645ad; text-decoration: none; }
+  .wiki-nav a:hover { text-decoration: underline; }
+
+  /* Tabs */
+  .wiki-tabs {
+    background: #fff; border-bottom: 1px solid #a7d7f9;
+  }
+  .wiki-tabs-inner {
+    max-width: 1200px; margin: 0 auto; padding: 0 24px;
+    display: flex; gap: 0;
+  }
+  .wiki-tab {
+    padding: 8px 16px; font-size: 13px; color: #0645ad; cursor: pointer;
+    border-bottom: 2px solid transparent; text-decoration: none;
+  }
+  .wiki-tab:hover { background: #eaf3ff; }
+  .wiki-tab.active { border-bottom-color: #36c; color: #202122; font-weight: 600; background: #fff; }
+
+  /* Layout */
+  .wiki-body { max-width: 1200px; margin: 0 auto; display: flex; gap: 0; }
+
+  /* Table of contents sidebar */
+  .toc-sidebar {
+    width: 260px; flex-shrink: 0; padding: 20px 16px 20px 24px;
+    position: sticky; top: 0; height: 100vh; overflow-y: auto;
+  }
+  .toc { background: #f8f9fa; border: 1px solid #a2a9b1; padding: 12px 16px; border-radius: 2px; }
+  .toc-title { font-weight: 700; font-size: 14px; margin-bottom: 8px; text-align: center; }
+  .toc-list { list-style: none; font-size: 13px; }
+  .toc-list li { margin-bottom: 4px; }
+  .toc-list a { color: #0645ad; text-decoration: none; }
+  .toc-list a:hover { text-decoration: underline; }
+  .toc-list .toc-h2 { font-weight: 600; margin-top: 8px; }
+  .toc-filter { width: 100%; padding: 6px 8px; border: 1px solid #a2a9b1; border-radius: 2px; font-size: 13px; margin-bottom: 10px; }
+
+  /* Content */
+  .wiki-content {
+    flex: 1; padding: 20px 24px 60px; min-width: 0;
+    background: #fff; border-left: 1px solid #a7d7f9; border-right: 1px solid #a7d7f9;
+  }
+  .wiki-content h1 {
+    font-size: 28px; font-weight: 400; border-bottom: 1px solid #a2a9b1;
+    padding-bottom: 4px; margin-bottom: 12px; font-family: 'Linux Libertine', Georgia, serif;
+  }
+  .wiki-content .lead {
+    font-size: 15px; margin-bottom: 20px; color: #54595d;
+  }
+
+  /* Stats bar */
+  .stats-bar {
+    display: flex; gap: 16px; flex-wrap: wrap; margin-bottom: 24px;
+    padding: 12px 16px; background: #eaf3ff; border: 1px solid #a7d7f9; border-radius: 2px;
+  }
+  .stat { text-align: center; }
+  .stat-num { font-size: 22px; font-weight: 700; color: #36c; }
+  .stat-label { font-size: 11px; color: #54595d; text-transform: uppercase; letter-spacing: 0.5px; }
+
+  /* Section headers */
+  .wiki-content h2 {
+    font-size: 22px; font-weight: 400; border-bottom: 1px solid #a2a9b1;
+    padding-bottom: 2px; margin: 28px 0 12px;
+    font-family: 'Linux Libertine', Georgia, serif;
+  }
+
+  /* Person cards */
+  .person-card {
+    border: 1px solid #c8ccd1; margin-bottom: 16px; border-radius: 2px;
+    overflow: hidden; transition: box-shadow 0.15s;
+  }
+  .person-card:hover { box-shadow: 0 1px 4px rgba(0,0,0,0.12); }
+  .person-card-header {
+    display: flex; align-items: center; gap: 14px; padding: 14px 16px;
+    background: #f8f9fa; cursor: pointer; user-select: none;
+  }
+  .person-card-header:hover { background: #eaecf0; }
+  .person-avatar {
+    width: 48px; height: 48px; border-radius: 50%; display: flex;
+    align-items: center; justify-content: center; color: #fff;
+    font-weight: 700; font-size: 18px; flex-shrink: 0;
+  }
+  .person-name { font-size: 16px; font-weight: 600; color: #0645ad; }
+  .person-title { font-size: 13px; color: #54595d; margin-top: 1px; }
+  .person-email-count {
+    margin-left: auto; font-size: 12px; color: #72777d;
+    background: #eaecf0; padding: 2px 10px; border-radius: 10px; flex-shrink: 0;
+  }
+  .person-card-body { padding: 14px 16px; display: none; border-top: 1px solid #c8ccd1; }
+  .person-card.open .person-card-body { display: block; }
+
+  .person-card-body p { margin-bottom: 10px; font-size: 14px; }
+  .person-card-body .field-label { font-weight: 600; color: #202122; }
+
+  .person-tags { display: flex; gap: 6px; flex-wrap: wrap; margin-top: 8px; }
+  .person-tag {
+    font-size: 11px; padding: 2px 8px; border-radius: 3px; font-weight: 600;
+  }
+  .tag-inner-circle { background: #fee7e6; color: #c5221f; }
+  .tag-state-dept { background: #e8f0fe; color: #1967d2; }
+  .tag-political { background: #e6f4ea; color: #137333; }
+  .tag-external { background: #fef7e0; color: #e37400; }
+  .tag-family { background: #f3e8fd; color: #8430ce; }
+  .tag-media { background: #e0f2f1; color: #00897b; }
+  .tag-foreign { background: #fce4ec; color: #c62828; }
+  .tag-legal { background: #efebe9; color: #4e342e; }
+
+  /* Relationship lines */
+  .rel-section { margin-top: 10px; }
+  .rel-section h4 { font-size: 13px; font-weight: 600; margin-bottom: 4px; color: #54595d; }
+  .rel-list { font-size: 13px; color: #0645ad; }
+  .rel-list a { color: #0645ad; text-decoration: none; }
+  .rel-list a:hover { text-decoration: underline; }
+
+  .back-link {
+    display: inline-flex; align-items: center; gap: 6px; color: #0645ad;
+    text-decoration: none; font-size: 14px; margin-bottom: 16px;
+  }
+  .back-link:hover { text-decoration: underline; }
+
+  /* Category filter pills at top */
+  .cat-filters { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 20px; }
+  .cat-pill {
+    padding: 5px 14px; border-radius: 20px; font-size: 13px; cursor: pointer;
+    border: 1px solid #a2a9b1; background: #fff; transition: all 0.15s;
+  }
+  .cat-pill:hover { background: #eaf3ff; }
+  .cat-pill.active { background: #36c; color: #fff; border-color: #36c; }
+
+  @media (max-width: 900px) {
+    .toc-sidebar { display: none; }
+    .wiki-body { display: block; }
+    .wiki-content { border: none; }
+  }
+</style>
+</head>
+<body>
+
+<div class="wiki-header">
+  <div class="wiki-header-inner">
+    <a class="wiki-logo" href="wiki.html">
+      <svg viewBox="0 0 48 48" fill="none">
+        <circle cx="24" cy="24" r="23" stroke="#a7d7f9" stroke-width="2" fill="#fff"/>
+        <text x="24" y="30" text-anchor="middle" font-size="20" font-weight="700" fill="#36c">W</text>
+      </svg>
+      <span class="wiki-logo-text"><strong>HRC</strong>pedia</span>
+    </a>
+    <div class="wiki-nav">
+      <a href="index.html">Email Viewer</a>
+      <a href="wiki.html" style="font-weight:600;">People Wiki</a>
+    </div>
+  </div>
+</div>
+
+<div class="wiki-tabs">
+  <div class="wiki-tabs-inner">
+    <a class="wiki-tab active">Article</a>
+    <a class="wiki-tab">Talk</a>
+    <a class="wiki-tab">View source</a>
+    <a class="wiki-tab">History</a>
+  </div>
+</div>
+
+<div class="wiki-body">
+  <div class="toc-sidebar">
+    <input type="text" class="toc-filter" id="tocFilter" placeholder="Filter people..." oninput="filterPeople()">
+    <div class="toc">
+      <div class="toc-title">Contents</div>
+      <ul class="toc-list" id="tocList"></ul>
+    </div>
+  </div>
+
+  <div class="wiki-content">
+    <a class="back-link" href="index.html">&larr; Back to Email Viewer</a>
+    <h1>Key People in the Hillary Clinton Email Archive</h1>
+    <p class="lead">
+      This reference documents the principal individuals who appear in the Hillary Clinton email archive
+      released by the U.S. Department of State. Entries include biographical information, roles held during
+      the period covered by the emails (2009–2013), and their relevance to associated legal and
+      congressional investigations.
+    </p>
+
+    <div class="stats-bar" id="statsBar"></div>
+
+    <div class="cat-filters" id="catFilters"></div>
+
+    <div id="wikiContent"></div>
+  </div>
+</div>
+
+<script>
+const PEOPLE = [
+  // ===== INNER CIRCLE =====
+  {
+    id: 'hillary-clinton',
+    name: 'Hillary Rodham Clinton',
+    aliases: ['H', 'HRC', 'hrod17'],
+    title: '67th U.S. Secretary of State (2009–2013)',
+    category: 'inner-circle',
+    tag: 'tag-inner-circle',
+    tagLabel: 'Inner Circle',
+    bio: `Hillary Diane Rodham Clinton (born October 26, 1947) served as the 67th United States Secretary of State under President Barack Obama from January 21, 2009 to February 1, 2013. Previously, she served as a United States Senator from New York (2001–2009) and as First Lady of the United States (1993–2001).`,
+    relevance: `Central figure in all investigations. The email archive originates from her use of a private email server (clintonemail.com) housed at her residence in Chappaqua, New York, rather than official State Department email systems. The FBI investigated her handling of classified information (2015–2016), concluding she was "extremely careless" but recommending no criminal charges. The Benghazi Select Committee subpoenaed her emails in 2015.`,
+    connections: ['huma-abedin', 'cheryl-mills', 'jake-sullivan', 'sidney-blumenthal', 'bill-clinton', 'chelsea-clinton'],
+    emailAliases: ['H', 'hrod17', 'Hillary Clinton']
+  },
+  {
+    id: 'huma-abedin',
+    name: 'Huma Abedin',
+    aliases: ['abedinh', 'Huma'],
+    title: 'Deputy Chief of Staff to Secretary Clinton',
+    category: 'inner-circle',
+    tag: 'tag-inner-circle',
+    tagLabel: 'Inner Circle',
+    bio: `Huma Mahmood Abedin (born July 28, 1976) is an American political staffer and long-time aide to Hillary Clinton. She served as Deputy Chief of Staff at the State Department (2009–2013) and was previously Clinton's traveling chief of staff and personal aide during her 2008 presidential campaign.`,
+    relevance: `One of the most frequent correspondents in the archive. Abedin had access to Clinton's private server and also forwarded State Department emails to her personal Yahoo account for printing. In October 2016, the FBI discovered additional Clinton emails on a laptop shared by Abedin and her then-husband Anthony Weiner, prompting FBI Director Comey to briefly reopen the investigation. She was granted immunity by the FBI during the investigation.`,
+    connections: ['hillary-clinton', 'cheryl-mills', 'jake-sullivan', 'lauren-jiloty', 'lona-valmoro', 'philippe-reines'],
+    emailAliases: ['abedinh', 'Abedin, Huma', 'Huma Abedin', 'AbedinH']
+  },
+  {
+    id: 'cheryl-mills',
+    name: 'Cheryl D. Mills',
+    aliases: ['millscd', 'CDM'],
+    title: 'Counselor and Chief of Staff to Secretary Clinton',
+    category: 'inner-circle',
+    tag: 'tag-inner-circle',
+    tagLabel: 'Inner Circle',
+    bio: `Cheryl D. Mills is an American lawyer who served as Counselor and Chief of Staff to Secretary of State Hillary Clinton from 2009 to 2013. She previously served as Deputy White House Counsel under President Bill Clinton, where she played a key role in his impeachment defense.`,
+    relevance: `Among the top correspondents in the archive. Mills was deeply involved in the response to the Benghazi attack and the subsequent email controversy. She was granted limited immunity by the FBI in exchange for turning over her laptop. Her dual role—simultaneously serving as Clinton's personal attorney and government official—raised conflict of interest questions. She was present during Clinton's FBI interview.`,
+    connections: ['hillary-clinton', 'huma-abedin', 'jake-sullivan', 'philippe-reines', 'capricia-marshall'],
+    emailAliases: ['millscd', 'Mills, Cheryl D', 'Mills, Cheryl 0', 'cheryl.mills', 'Cheryl Mills']
+  },
+  {
+    id: 'jake-sullivan',
+    name: 'Jacob "Jake" Sullivan',
+    aliases: ['sullivanjj', 'Jake Sullivan'],
+    title: 'Director of Policy Planning, State Department',
+    category: 'inner-circle',
+    tag: 'tag-inner-circle',
+    tagLabel: 'Inner Circle',
+    bio: `Jacob Jeremiah Sullivan (born November 28, 1976) served as Director of Policy Planning at the State Department (2011–2013) and Deputy Chief of Staff to Secretary Clinton (2009–2011). He later served as National Security Advisor to Vice President Biden and subsequently as National Security Advisor to President Biden (2021–2025).`,
+    relevance: `One of the highest-volume correspondents in the archive. Sullivan exchanged numerous emails with Clinton on her private server containing information later classified at various levels. In one notable exchange, he advised Clinton on how to send talking points through a "non-secure" channel by stripping classification markings. He was a key figure in Libya policy and Benghazi response communications.`,
+    connections: ['hillary-clinton', 'huma-abedin', 'cheryl-mills', 'philippe-reines'],
+    emailAliases: ['sullivanjj', 'Sullivan, Jacob J', 'Sullivan, Jacobi', 'jake.sullivan', 'Jake Sullivan', 'Jake.Sullivan']
+  },
+  {
+    id: 'sidney-blumenthal',
+    name: 'Sidney Blumenthal',
+    aliases: ['sbwhoeop', 'Sid', 'sid'],
+    title: 'Unofficial Adviser / Clinton Foundation Employee',
+    category: 'inner-circle',
+    tag: 'tag-inner-circle',
+    tagLabel: 'Inner Circle',
+    bio: `Sidney Stone Blumenthal (born November 6, 1948) is an American journalist, author, and political operative. He served as a senior adviser to President Bill Clinton (1997–2001). During Hillary Clinton's tenure at State, he was employed by the Clinton Foundation and the pro-Clinton group Media Matters/American Bridge.`,
+    relevance: `Blumenthal was a prolific source of intelligence memos to Clinton, despite having no security clearance and being explicitly barred from a State Department position by the Obama White House. His memos—often sourced from former CIA operative Tyler Drumheller—covered Libya, the Middle East, and domestic politics. The transmission of these intelligence reports to an unsecured private server raised significant concerns about classified information spillage. He also had business interests in Libya through Osprey Global Solutions, creating potential conflicts of interest.`,
+    connections: ['hillary-clinton', 'jake-sullivan', 'tyler-drumheller'],
+    emailAliases: ['Blumenthal, Sidney', 'Sidney Blumenthal', 'sbwhoeop', 'Sid Blumenthal']
+  },
+  {
+    id: 'philippe-reines',
+    name: 'Philippe I. Reines',
+    aliases: ['preines'],
+    title: 'Senior Advisor & Deputy Assistant Secretary of State',
+    category: 'inner-circle',
+    tag: 'tag-inner-circle',
+    tagLabel: 'Inner Circle',
+    bio: `Philippe I. Reines served as Senior Advisor to Secretary Clinton and Deputy Assistant Secretary of State for Strategic Communications (2009–2013). He had been Clinton's press secretary in the Senate and is known as one of her most loyal and combative advisers.`,
+    relevance: `Frequent correspondent in the archive. Reines handled sensitive media strategy and crisis communications, including Benghazi-related messaging. He also used personal email accounts for government business. His combative exchanges with journalists regarding FOIA requests for Clinton's emails became part of the public record.`,
+    connections: ['hillary-clinton', 'huma-abedin', 'cheryl-mills', 'jake-sullivan'],
+    emailAliases: ['preines', 'Reines, Philippe I', 'Reines Philippe', 'reinesp']
+  },
+  // ===== STATE DEPARTMENT =====
+  {
+    id: 'monica-hanley',
+    name: 'Monica R. Hanley',
+    aliases: ['hanleymr'],
+    title: 'Special Assistant to Secretary Clinton',
+    category: 'state-dept',
+    tag: 'tag-state-dept',
+    tagLabel: 'State Dept',
+    bio: `Monica R. Hanley served as a personal aide and Special Assistant to Secretary Clinton at the State Department. She handled scheduling, daily briefing logistics, and was frequently one of the first contacts for Clinton each morning.`,
+    relevance: `Hanley transferred Clinton's emails from a laptop to the private server and was involved in day-to-day classified information handling. She was granted an FBI immunity deal for providing her laptop. Hanley reportedly did not have a security clearance adequate for some of the information she processed.`,
+    connections: ['hillary-clinton', 'huma-abedin', 'lona-valmoro', 'lauren-jiloty'],
+    emailAliases: ['Hanley, Monica R', 'hanleymr', 'monica.hanley']
+  },
+  {
+    id: 'lauren-jiloty',
+    name: 'Lauren C. Jiloty',
+    aliases: ['JilotyLC'],
+    title: 'Special Assistant to Secretary Clinton',
+    category: 'state-dept',
+    tag: 'tag-state-dept',
+    tagLabel: 'State Dept',
+    bio: `Lauren C. Jiloty served as a personal aide and Special Assistant to Secretary Clinton. She was part of Clinton's close-knit personal staff responsible for logistics, travel, and communications support.`,
+    relevance: `High-frequency correspondent in the archive, primarily in a support and logistics capacity. She was among the staff who had access to Clinton's private email system.`,
+    connections: ['hillary-clinton', 'huma-abedin', 'monica-hanley', 'lona-valmoro'],
+    emailAliases: ['JilotyLC', 'jilotylc', 'Lauren Jiloty']
+  },
+  {
+    id: 'lona-valmoro',
+    name: 'Lona J. Valmoro',
+    aliases: ['ValmoroLJ', 'ValmoroU'],
+    title: 'Scheduling Director for Secretary Clinton',
+    category: 'state-dept',
+    tag: 'tag-state-dept',
+    tagLabel: 'State Dept',
+    bio: `Lona J. Valmoro served as the Director of Scheduling for Secretary Clinton at the State Department. She was responsible for managing Clinton's complex international and domestic schedule.`,
+    relevance: `Frequent correspondent coordinating meetings, calls, and travel. Her scheduling emails are relevant to investigations examining who Clinton met with and whether Foundation donors received preferential access.`,
+    connections: ['hillary-clinton', 'huma-abedin', 'monica-hanley', 'lauren-jiloty', 'cheryl-mills'],
+    emailAliases: ['ValmoroLJ', 'ValmoroU', 'Lona Valmoro', 'valmorolj', 'valmorou']
+  },
+  {
+    id: 'patrick-kennedy',
+    name: 'Patrick F. Kennedy',
+    aliases: [],
+    title: 'Under Secretary of State for Management',
+    category: 'state-dept',
+    tag: 'tag-state-dept',
+    tagLabel: 'State Dept',
+    bio: `Patrick F. Kennedy served as Under Secretary of State for Management from 2007 to 2017, making him the most senior career official at the State Department during the Clinton email period. He oversaw all department operations including security, diplomatic facilities, and information technology.`,
+    relevance: `Kennedy was involved in the Benghazi Accountability Review Board process and was later revealed to have allegedly sought a "quid pro quo" with the FBI to declassify an email from Clinton's server in exchange for allowing the FBI to place more agents in countries where they were restricted. He also oversaw the State Department's response to FOIA requests and congressional inquiries regarding Clinton's emails.`,
+    connections: ['hillary-clinton', 'cheryl-mills', 'victoria-nuland'],
+    emailAliases: ['Kennedy, Patrick F']
+  },
+  {
+    id: 'james-steinberg',
+    name: 'James B. Steinberg',
+    aliases: ['SteinbergJB'],
+    title: 'Deputy Secretary of State (2009–2011)',
+    category: 'state-dept',
+    tag: 'tag-state-dept',
+    tagLabel: 'State Dept',
+    bio: `James B. Steinberg served as Deputy Secretary of State (2009–2011), the second-highest ranking official at the State Department. He previously served as Deputy National Security Advisor under President Clinton.`,
+    relevance: `As Deputy Secretary, Steinberg was involved in major policy decisions reflected in the email archive, particularly regarding Afghanistan, Pakistan, and China policy.`,
+    connections: ['hillary-clinton', 'jake-sullivan', 'william-burns'],
+    emailAliases: ['Steinberg, James', 'SteinbergJB', 'steinbergjb']
+  },
+  {
+    id: 'william-burns',
+    name: 'William J. Burns',
+    aliases: ['wburns'],
+    title: 'Deputy Secretary of State (2011–2014)',
+    category: 'state-dept',
+    tag: 'tag-state-dept',
+    tagLabel: 'State Dept',
+    bio: `William Joseph Burns succeeded Steinberg as Deputy Secretary of State (2011–2014). A career Foreign Service Officer, he later served as Director of the Central Intelligence Agency (2021–2025).`,
+    relevance: `Burns appears in emails concerning high-level diplomatic negotiations. His communications would have contained sensitive foreign policy information transmitted through Clinton's private server.`,
+    connections: ['hillary-clinton', 'jake-sullivan', 'james-steinberg'],
+    emailAliases: ['William Burns', 'wburns']
+  },
+  {
+    id: 'victoria-nuland',
+    name: 'Victoria Nuland',
+    aliases: [],
+    title: 'State Department Spokesperson (2011–2013)',
+    category: 'state-dept',
+    tag: 'tag-state-dept',
+    tagLabel: 'State Dept',
+    bio: `Victoria Jane Nuland served as the State Department Spokesperson (2011–2013). She previously served as U.S. Ambassador to NATO and later as Assistant Secretary of State for European and Eurasian Affairs.`,
+    relevance: `Nuland played a central role in editing the Benghazi talking points, removing references to CIA warnings and prior attacks. Her email exchanges about the talking points became key evidence in the Benghazi investigation. She also raised concerns internally about Blumenthal's intelligence memos to Clinton.`,
+    connections: ['hillary-clinton', 'jake-sullivan', 'patrick-kennedy', 'philip-crowley'],
+    emailAliases: ['Nuland, Victoria', 'nulandvj']
+  },
+  {
+    id: 'philip-crowley',
+    name: 'Philip J. Crowley',
+    aliases: ['crowleypj'],
+    title: 'Assistant Secretary for Public Affairs (2009–2011)',
+    category: 'state-dept',
+    tag: 'tag-state-dept',
+    tagLabel: 'State Dept',
+    bio: `Philip J. Crowley served as Assistant Secretary of State for Public Affairs from 2009 to 2011. He resigned after publicly criticizing the military's treatment of WikiLeaks source Chelsea Manning.`,
+    relevance: `Crowley appears in emails coordinating public messaging and media strategy during the early Clinton tenure, including on issues that later became subjects of investigation.`,
+    connections: ['hillary-clinton', 'philippe-reines', 'victoria-nuland'],
+    emailAliases: ['Crowley, Philip', 'crowleypj', 'Phillip Crowley']
+  },
+  {
+    id: 'richard-holbrooke',
+    name: 'Richard Holbrooke',
+    aliases: [],
+    title: 'Special Representative for Afghanistan and Pakistan',
+    category: 'state-dept',
+    tag: 'tag-state-dept',
+    tagLabel: 'State Dept',
+    bio: `Richard Charles Albert Holbrooke (1941–2010) served as Special Representative for Afghanistan and Pakistan (SRAP) from 2009 until his death in December 2010. He was previously known for brokering the Dayton Accords ending the Bosnian War.`,
+    relevance: `Holbrooke's AFPAK communications appear in the archive and contain sensitive diplomatic and military information. His sudden death during a meeting at the State Department in December 2010 is referenced in several emails.`,
+    connections: ['hillary-clinton', 'jake-sullivan', 'james-steinberg'],
+    emailAliases: ['Richard Holbrooke', 'Holbrooke, Richard']
+  },
+  {
+    id: 'wendy-sherman',
+    name: 'Wendy R. Sherman',
+    aliases: [],
+    title: 'Under Secretary for Political Affairs (2011–2015)',
+    category: 'state-dept',
+    tag: 'tag-state-dept',
+    tagLabel: 'State Dept',
+    bio: `Wendy Ruth Sherman served as Under Secretary of State for Political Affairs, the fourth-ranking official in the State Department. She later served as Deputy Secretary of State (2021–2023).`,
+    relevance: `Sherman handled high-level diplomatic matters and appears in emails concerning Iran negotiations and other sensitive policy areas.`,
+    connections: ['hillary-clinton', 'jake-sullivan', 'william-burns'],
+    emailAliases: ['Sherman, Wendy R', 'Wendy Sherman']
+  },
+  {
+    id: 'anne-marie-slaughter',
+    name: 'Anne-Marie Slaughter',
+    aliases: [],
+    title: 'Director of Policy Planning (2009–2011)',
+    category: 'state-dept',
+    tag: 'tag-state-dept',
+    tagLabel: 'State Dept',
+    bio: `Anne-Marie Slaughter served as Director of Policy Planning at the State Department from 2009 to 2011. She is a professor of international affairs at Princeton and author on foreign policy.`,
+    relevance: `Slaughter was a strong advocate for intervention in Libya and her policy memos pushing for action appear in the email archive. Her departure preceded the Benghazi attack but her advocacy helped shape the policy that led to it.`,
+    connections: ['hillary-clinton', 'jake-sullivan'],
+    emailAliases: ['Slaughter, Anne-Marie', 'Anne-Marie Slaughter']
+  },
+  {
+    id: 'daniel-schwerin',
+    name: 'Daniel B. Schwerin',
+    aliases: [],
+    title: 'Speechwriter for Secretary Clinton',
+    category: 'state-dept',
+    tag: 'tag-state-dept',
+    tagLabel: 'State Dept',
+    bio: `Daniel B. Schwerin served as a senior speechwriter and policy advisor to Secretary Clinton at the State Department. He was part of her close policy team and later worked on her 2016 presidential campaign.`,
+    relevance: `Schwerin appears in numerous emails drafting and editing speeches, policy statements, and messaging. His emails often contain pre-decisional policy discussions.`,
+    connections: ['hillary-clinton', 'jake-sullivan', 'lissa-muscatine'],
+    emailAliases: ['Schwerin, Daniel B', 'Daniel Schwerin']
+  },
+  {
+    id: 'lissa-muscatine',
+    name: 'Lissa Muscatine',
+    aliases: ['muscatinel'],
+    title: 'Chief Speechwriter for Secretary Clinton',
+    category: 'state-dept',
+    tag: 'tag-state-dept',
+    tagLabel: 'State Dept',
+    bio: `Lissa Muscatine served as Chief Speechwriter to Secretary Clinton. She had previously been a speechwriter for Hillary Clinton during the White House years and is a long-time member of Clinton's inner orbit.`,
+    relevance: `Muscatine's emails contain draft speeches and messaging strategy, some of which touch on topics that later became subjects of investigation.`,
+    connections: ['hillary-clinton', 'daniel-schwerin', 'jake-sullivan'],
+    emailAliases: ['muscatinel', 'Lissa Muscatine']
+  },
+  {
+    id: 'melanne-verveer',
+    name: 'Melanne Verveer',
+    aliases: ['verveerms'],
+    title: 'Ambassador-at-Large for Global Women\'s Issues',
+    category: 'state-dept',
+    tag: 'tag-state-dept',
+    tagLabel: 'State Dept',
+    bio: `Melanne Verveer served as the first U.S. Ambassador-at-Large for Global Women's Issues (2009–2013). She previously served as Chief of Staff to First Lady Hillary Clinton.`,
+    relevance: `Verveer appears in emails coordinating women's rights initiatives and diplomatic events. Her long-standing personal relationship with Clinton is reflected in the informal tone of their correspondence.`,
+    connections: ['hillary-clinton', 'cheryl-mills', 'huma-abedin'],
+    emailAliases: ['verveerms', 'Melanne Verveer', 'pverveer']
+  },
+  {
+    id: 'kurt-campbell',
+    name: 'Kurt Campbell',
+    aliases: [],
+    title: 'Assistant Secretary for East Asian and Pacific Affairs',
+    category: 'state-dept',
+    tag: 'tag-state-dept',
+    tagLabel: 'State Dept',
+    bio: `Kurt M. Campbell served as Assistant Secretary of State for East Asian and Pacific Affairs (2009–2013), a key architect of the Obama administration's "pivot to Asia." He later served as Deputy Secretary of State (2024–2025).`,
+    relevance: `Campbell's emails concern sensitive diplomatic matters with China, Japan, North Korea, and other Asian nations—information that was transmitted through the unsecured private server.`,
+    connections: ['hillary-clinton', 'jake-sullivan'],
+    emailAliases: ['Kurt Campbell', 'campbellkm']
+  },
+  // ===== POLITICAL / WHITE HOUSE =====
+  {
+    id: 'barack-obama',
+    name: 'Barack Obama',
+    aliases: [],
+    title: '44th President of the United States',
+    category: 'political',
+    tag: 'tag-political',
+    tagLabel: 'Political',
+    bio: `Barack Hussein Obama II (born August 4, 1961) served as the 44th President of the United States (2009–2017). He appointed Hillary Clinton as Secretary of State.`,
+    relevance: `Obama was revealed to have exchanged emails with Clinton on her private server using a pseudonymous email address. This contradicted his public statement that he first learned of Clinton's private email server "the same time everybody else learned it, through news reports." The White House initially said Obama and Clinton never exchanged emails, which was later proved false.`,
+    connections: ['hillary-clinton', 'jake-sullivan', 'thomas-donilon', 'david-axelrod'],
+    emailAliases: ['Barack Obama']
+  },
+  {
+    id: 'john-podesta',
+    name: 'John Podesta',
+    aliases: [],
+    title: 'Counselor to the President / Campaign Chairman',
+    category: 'political',
+    tag: 'tag-political',
+    tagLabel: 'Political',
+    bio: `John David Podesta served as Counselor to President Obama (2014–2015) and Chairman of Hillary Clinton's 2016 presidential campaign. He previously served as White House Chief of Staff under President Bill Clinton.`,
+    relevance: `While Podesta appears sparingly in the State Department archive, his later hacked emails (released by WikiLeaks in 2016) contained extensive discussions about Clinton's private server and the campaign's strategy for managing the email controversy.`,
+    connections: ['hillary-clinton', 'cheryl-mills', 'huma-abedin'],
+    emailAliases: ['John Podesta']
+  },
+  {
+    id: 'david-axelrod',
+    name: 'David Axelrod',
+    aliases: ['axelrod'],
+    title: 'Senior Advisor to President Obama',
+    category: 'political',
+    tag: 'tag-political',
+    tagLabel: 'Political',
+    bio: `David M. Axelrod served as Senior Advisor to President Obama (2009–2011) and was the chief strategist for Obama's 2008 presidential campaign.`,
+    relevance: `Axelrod appears in emails and later publicly stated he did not know about Clinton's private email server, raising questions about who in the Obama administration was aware of the arrangement.`,
+    connections: ['hillary-clinton', 'barack-obama'],
+    emailAliases: ['David Axelrod', 'axelrod']
+  },
+  {
+    id: 'thomas-donilon',
+    name: 'Thomas Donilon',
+    aliases: [],
+    title: 'National Security Advisor (2010–2013)',
+    category: 'political',
+    tag: 'tag-political',
+    tagLabel: 'Political',
+    bio: `Thomas E. Donilon served as National Security Advisor to President Obama from 2010 to 2013. He previously served as Deputy National Security Advisor.`,
+    relevance: `As National Security Advisor, Donilon's communications with Clinton would have involved the most sensitive national security matters, including classified intelligence that passed through the private server.`,
+    connections: ['hillary-clinton', 'jake-sullivan', 'barack-obama'],
+    emailAliases: ['Thomas Donilon']
+  },
+  {
+    id: 'susan-rice',
+    name: 'Susan Rice',
+    aliases: [],
+    title: 'U.S. Ambassador to the United Nations (2009–2013)',
+    category: 'political',
+    tag: 'tag-political',
+    tagLabel: 'Political',
+    bio: `Susan Elizabeth Rice served as U.S. Ambassador to the United Nations (2009–2013) and later as National Security Advisor (2013–2017).`,
+    relevance: `Rice became central to the Benghazi controversy after appearing on five Sunday news shows on September 16, 2012, attributing the attack to a spontaneous protest over an anti-Islam video—talking points that were later found to be inaccurate. Emails in the archive relate to the creation and editing of those talking points.`,
+    connections: ['hillary-clinton', 'jake-sullivan', 'victoria-nuland', 'barack-obama'],
+    emailAliases: ['Susan Rice']
+  },
+  // ===== EXTERNAL ADVISORS =====
+  {
+    id: 'doug-band',
+    name: 'Doug Band',
+    aliases: [],
+    title: 'President of Teneo / Clinton Foundation Advisor',
+    category: 'external',
+    tag: 'tag-external',
+    tagLabel: 'External',
+    bio: `Douglas J. Band served as a top aide to President Bill Clinton and co-founded the Clinton Global Initiative. He later founded Teneo Holdings, a global advisory firm, while maintaining close ties to the Clinton Foundation.`,
+    relevance: `Band is central to "pay-to-play" allegations. His leaked 2011 memo described "Bill Clinton, Inc."—a system where he solicited donations to the Clinton Foundation while simultaneously directing lucrative speaking engagements and consulting contracts to Bill Clinton. Emails show Band requesting State Department favors for Foundation donors and Teneo clients, including expedited visa processing and meetings with senior officials.`,
+    connections: ['hillary-clinton', 'huma-abedin', 'cheryl-mills', 'bill-clinton', 'justin-cooper'],
+    emailAliases: ['Doug Band', 'doug band']
+  },
+  {
+    id: 'tyler-drumheller',
+    name: 'Tyler Drumheller',
+    aliases: [],
+    title: 'Former CIA Chief of European Operations',
+    category: 'external',
+    tag: 'tag-external',
+    tagLabel: 'External',
+    bio: `Tyler Drumheller (1952–2015) was a former CIA officer who served as Chief of the European Division of the CIA's Directorate of Operations. After retiring from the CIA, he became a private intelligence consultant.`,
+    relevance: `Drumheller was the primary source for Sidney Blumenthal's intelligence memos to Clinton on Libya and other subjects. He had business interests tied to Osprey Global Solutions, which stood to profit from regime change in Libya. The transmission of intelligence from a former CIA officer through an unauthorized private channel to the Secretary of State's unsecured server represents one of the most serious security concerns in the archive.`,
+    connections: ['sidney-blumenthal', 'hillary-clinton'],
+    emailAliases: ['Tyler Drumheller']
+  },
+  {
+    id: 'justin-cooper',
+    name: 'Justin Cooper',
+    aliases: ['jcooper'],
+    title: 'Bill Clinton Personal Aide / IT Manager',
+    category: 'external',
+    tag: 'tag-external',
+    tagLabel: 'External',
+    bio: `Justin Cooper served as a personal aide to former President Bill Clinton and helped manage the private email server at the Clinton residence in Chappaqua, New York. He had no security clearance.`,
+    relevance: `Cooper physically set up the original private server and had administrator-level access despite holding no security clearance. He told the FBI he recalled disposing of Clinton's old BlackBerry devices by breaking them in half or hitting them with a hammer. He also registered the clintonemail.com domain name.`,
+    connections: ['hillary-clinton', 'bill-clinton', 'doug-band', 'bryan-pagliano'],
+    emailAliases: ['Justin Cooper', 'jcooper']
+  },
+  {
+    id: 'bryan-pagliano',
+    name: 'Bryan Pagliano',
+    aliases: [],
+    title: 'IT Specialist / Server Administrator',
+    category: 'external',
+    tag: 'tag-external',
+    tagLabel: 'External',
+    bio: `Bryan Pagliano was an IT specialist who worked on Clinton's 2008 presidential campaign and was subsequently hired by the State Department. He simultaneously managed Clinton's private email server as a side arrangement, reportedly paid directly by the Clintons.`,
+    relevance: `Pagliano set up and maintained the private server that is at the center of the investigation. He invoked his Fifth Amendment rights before Congress and was granted immunity by the FBI. He was held in civil contempt for failing to appear before the Benghazi Committee despite a subpoena. He was the only person who understood the full technical architecture of the server.`,
+    connections: ['hillary-clinton', 'justin-cooper', 'cheryl-mills'],
+    emailAliases: []
+  },
+  {
+    id: 'mark-penn',
+    name: 'Mark Penn',
+    aliases: [],
+    title: 'Pollster and Political Strategist',
+    category: 'external',
+    tag: 'tag-external',
+    tagLabel: 'External',
+    bio: `Mark J. Penn is a pollster and political strategist who served as chief strategist for Hillary Clinton's 2008 presidential campaign. He is CEO of the Stagwell Group.`,
+    relevance: `Penn appears in emails providing political analysis and advice to Clinton during her tenure as Secretary of State, blurring the line between official government work and political activity.`,
+    connections: ['hillary-clinton'],
+    emailAliases: ['Mark Penn', 'markjpenn']
+  },
+  {
+    id: 'neera-tanden',
+    name: 'Neera Tanden',
+    aliases: [],
+    title: 'President, Center for American Progress',
+    category: 'external',
+    tag: 'tag-external',
+    tagLabel: 'External',
+    bio: `Neera Tanden served as President of the Center for American Progress. She was a policy advisor to Clinton's campaigns and later served in the Biden administration as Director of the Domestic Policy Council.`,
+    relevance: `Tanden appears in emails providing political advice and policy recommendations, further documented in the later WikiLeaks release of Podesta's emails where she discussed the email server controversy.`,
+    connections: ['hillary-clinton', 'john-podesta', 'cheryl-mills'],
+    emailAliases: ['Neera Tanden']
+  },
+  // ===== FAMILY =====
+  {
+    id: 'bill-clinton',
+    name: 'William J. "Bill" Clinton',
+    aliases: ['WJC'],
+    title: '42nd President of the United States',
+    category: 'family',
+    tag: 'tag-family',
+    tagLabel: 'Family',
+    bio: `William Jefferson Clinton (born August 19, 1946) served as the 42nd President of the United States (1993–2001). The private email server was located in the Clintons' Chappaqua, New York residence.`,
+    relevance: `The private server was originally set up for Bill Clinton's post-presidential office. Bill Clinton's spokesman stated he sent only two emails in his life, but the server infrastructure that handled his staff's communications was the same system Clinton used for State Department business. His speaking fees and Clinton Foundation activities are central to pay-to-play investigations. Foundation donors who received favorable State Department treatment are documented in the archive.`,
+    connections: ['hillary-clinton', 'doug-band', 'justin-cooper', 'chelsea-clinton'],
+    emailAliases: ['Bill Clinton']
+  },
+  {
+    id: 'chelsea-clinton',
+    name: 'Chelsea Clinton',
+    aliases: ['Diane Reynolds'],
+    title: 'Vice Chair, Clinton Foundation',
+    category: 'family',
+    tag: 'tag-family',
+    tagLabel: 'Family',
+    bio: `Chelsea Victoria Clinton (born February 27, 1980) served as Vice Chair of the Clinton Foundation. In the email archive, she sometimes appears under the pseudonym "Diane Reynolds."`,
+    relevance: `Chelsea Clinton used the pseudonym "Diane Reynolds" in email communications. She was involved in internal Clinton Foundation disputes with Doug Band over governance and conflicts of interest, documented in emails later released by WikiLeaks. On the night of the Benghazi attack, Hillary Clinton emailed Chelsea (as "Diane Reynolds") that the attack was by an "Al Queda-like group"—contradicting the administration's public attribution to a spontaneous protest.`,
+    connections: ['hillary-clinton', 'bill-clinton', 'doug-band'],
+    emailAliases: ['Chelsea Clinton', 'Diane Reynolds']
+  },
+  // ===== FOREIGN / DIPLOMATIC =====
+  {
+    id: 'george-mitchell',
+    name: 'George Mitchell',
+    aliases: [],
+    title: 'Special Envoy for Middle East Peace',
+    category: 'foreign',
+    tag: 'tag-foreign',
+    tagLabel: 'Foreign/Diplomatic',
+    bio: `George John Mitchell Jr. served as U.S. Special Envoy for Middle East Peace (2009–2011). He previously served as U.S. Senator from Maine and brokered the Good Friday Agreement in Northern Ireland.`,
+    relevance: `Mitchell's sensitive Middle East negotiations and diplomatic cables would have been transmitted through Clinton's unsecured email system.`,
+    connections: ['hillary-clinton', 'jake-sullivan'],
+    emailAliases: ['George Mitchell']
+  },
+  {
+    id: 'jeffrey-feltman',
+    name: 'Jeffrey Feltman',
+    aliases: [],
+    title: 'Assistant Secretary for Near Eastern Affairs',
+    category: 'foreign',
+    tag: 'tag-foreign',
+    tagLabel: 'Foreign/Diplomatic',
+    bio: `Jeffrey D. Feltman served as Assistant Secretary of State for Near Eastern Affairs (2009–2012) before becoming UN Under-Secretary-General for Political Affairs.`,
+    relevance: `Feltman oversaw the region encompassing Libya and Benghazi. His communications about the Arab Spring, Libya intervention, and regional upheaval appear in the archive.`,
+    connections: ['hillary-clinton', 'jake-sullivan'],
+    emailAliases: ['Jeffrey Feltman', 'Feltman, Jeffrey']
+  },
+  {
+    id: 'chris-stevens',
+    name: 'J. Christopher Stevens',
+    aliases: [],
+    title: 'U.S. Ambassador to Libya (2012)',
+    category: 'foreign',
+    tag: 'tag-foreign',
+    tagLabel: 'Foreign/Diplomatic',
+    bio: `John Christopher Stevens (1960–2012) served as U.S. Ambassador to Libya from June 2012. He previously served as Special Envoy to the Libyan Transitional National Council during the 2011 civil war.`,
+    relevance: `Ambassador Stevens was killed along with three other Americans in the September 11, 2012 attack on the U.S. diplomatic compound in Benghazi. His requests for additional security, documented in State Department communications, became a central focus of congressional investigations into whether the State Department failed to adequately protect personnel.`,
+    connections: ['hillary-clinton', 'jake-sullivan', 'patrick-kennedy', 'jeffrey-feltman'],
+    emailAliases: ['Chris Stevens', 'Stevens']
+  },
+  {
+    id: 'capricia-marshall',
+    name: 'Capricia Penavic Marshall',
+    aliases: [],
+    title: 'Chief of Protocol of the United States',
+    category: 'state-dept',
+    tag: 'tag-state-dept',
+    tagLabel: 'State Dept',
+    bio: `Capricia Penavic Marshall served as Chief of Protocol of the United States (2009–2013) and was a long-time Clinton loyalist, having served as Social Secretary in the Clinton White House.`,
+    relevance: `Marshall appears in emails arranging high-level diplomatic events and foreign dignitary meetings, some of which intersect with Clinton Foundation donor access questions.`,
+    connections: ['hillary-clinton', 'cheryl-mills', 'huma-abedin'],
+    emailAliases: ['Marshall, Capricia P', 'Capricia Marshall']
+  },
+  // ===== LEGAL / INVESTIGATION =====
+  {
+    id: 'james-comey',
+    name: 'James B. Comey',
+    aliases: [],
+    title: 'Director of the FBI (2013–2017)',
+    category: 'legal',
+    tag: 'tag-legal',
+    tagLabel: 'Investigation',
+    bio: `James Brien Comey Jr. served as Director of the Federal Bureau of Investigation from 2013 to 2017. He oversaw the FBI investigation into Clinton's private email server, known internally as "Midyear Exam."`,
+    relevance: `Comey announced on July 5, 2016 that while Clinton was "extremely careless" in handling classified information, the FBI would not recommend criminal charges. On October 28, 2016—11 days before the election—he sent a letter to Congress announcing the discovery of additional emails on Anthony Weiner's laptop, effectively reopening the investigation. He closed it again on November 6. His decisions remain among the most controversial in FBI history.`,
+    connections: ['hillary-clinton', 'huma-abedin', 'cheryl-mills'],
+    emailAliases: []
+  },
+  {
+    id: 'trey-gowdy',
+    name: 'Trey Gowdy',
+    aliases: [],
+    title: 'Chairman, Benghazi Select Committee',
+    category: 'legal',
+    tag: 'tag-legal',
+    tagLabel: 'Investigation',
+    bio: `Harold Watson "Trey" Gowdy III served as Chairman of the House Select Committee on Benghazi (2014–2016). A former federal prosecutor, he represented South Carolina's 4th congressional district.`,
+    relevance: `Gowdy's committee subpoenaed Clinton's emails in March 2015, which led to the public disclosure of the private server. The committee's investigation ultimately produced an 800-page report. During the investigation, it was revealed that Clinton's team had deleted approximately 33,000 emails deemed "personal" before turning over the remaining approximately 30,000 to the State Department.`,
+    connections: ['hillary-clinton', 'cheryl-mills', 'sidney-blumenthal'],
+    emailAliases: []
+  },
+  {
+    id: 'robert-russo',
+    name: 'Robert Russo',
+    aliases: ['Russorv'],
+    title: 'Personal Assistant / Household Staff',
+    category: 'external',
+    tag: 'tag-external',
+    tagLabel: 'External',
+    bio: `Robert Russo served in a personal capacity to the Clinton household, handling logistics and personal matters.`,
+    relevance: `Russo appears frequently in the email archive handling personal errands and logistics for Clinton, demonstrating the mixing of personal and official business on the private server.`,
+    connections: ['hillary-clinton', 'huma-abedin', 'oscar-flores'],
+    emailAliases: ['Russorv', 'Robert Russo', 'russorv']
+  },
+  {
+    id: 'oscar-flores',
+    name: 'Oscar Flores',
+    aliases: [],
+    title: 'House Manager, Clinton Residence',
+    category: 'external',
+    tag: 'tag-external',
+    tagLabel: 'External',
+    bio: `Oscar Flores served as the house manager at the Clinton residence in Chappaqua, New York, where the private email server was physically located.`,
+    relevance: `Flores appears in emails handling personal household matters, further illustrating the intermingling of official State Department business with personal correspondence on the same server.`,
+    connections: ['hillary-clinton', 'robert-russo', 'huma-abedin'],
+    emailAliases: ['Oscar Flores', 'oscar flores']
+  },
+  {
+    id: 'nora-toiv',
+    name: 'Nora F. Toiv',
+    aliases: [],
+    title: 'Special Assistant, Office of the Secretary',
+    category: 'state-dept',
+    tag: 'tag-state-dept',
+    tagLabel: 'State Dept',
+    bio: `Nora F. Toiv served as a Special Assistant in the Office of the Secretary of State.`,
+    relevance: `Toiv appears in the archive as part of the administrative support staff coordinating Clinton's daily activities and correspondence.`,
+    connections: ['hillary-clinton', 'huma-abedin', 'cheryl-mills'],
+    emailAliases: ['Toiv, Nora F', 'Nora Toiv']
+  },
+  {
+    id: 'lynn-forester',
+    name: 'Lynn Forester de Rothschild',
+    aliases: [],
+    title: 'CEO, E.L. Rothschild / Clinton Donor',
+    category: 'external',
+    tag: 'tag-external',
+    tagLabel: 'External',
+    bio: `Lynn Forester de Rothschild is an American-British businesswoman who serves as CEO of E.L. Rothschild and is a prominent Democratic donor with close ties to the Clintons.`,
+    relevance: `Her emails to Clinton illustrate the access major donors had to the Secretary of State, with personal and political discussions conducted over the private server.`,
+    connections: ['hillary-clinton', 'cheryl-mills'],
+    emailAliases: ['Lynn Forester de Rothschild']
+  },
+  {
+    id: 'strobe-talbott',
+    name: 'Strobe Talbott',
+    aliases: [],
+    title: 'President, Brookings Institution',
+    category: 'external',
+    tag: 'tag-external',
+    tagLabel: 'External',
+    bio: `Nelson Strobridge "Strobe" Talbott III served as President of the Brookings Institution (2002–2017). He previously served as Deputy Secretary of State under President Clinton and is a close personal friend of Bill Clinton.`,
+    relevance: `Talbott appears in emails as an informal sounding board on foreign policy matters, representing the network of outside advisers communicating with Clinton on her private server.`,
+    connections: ['hillary-clinton', 'jake-sullivan'],
+    emailAliases: ['Strobe Talbott']
+  },
+  {
+    id: 'madeleine-albright',
+    name: 'Madeleine Albright',
+    aliases: [],
+    title: 'Former Secretary of State (1997–2001)',
+    category: 'political',
+    tag: 'tag-political',
+    tagLabel: 'Political',
+    bio: `Madeleine Jana Korbel Albright (1937–2022) served as the 64th U.S. Secretary of State (1997–2001), the first woman to hold that position. She remained active in foreign policy circles and as a Democratic Party figure.`,
+    relevance: `Albright appears in the archive as a correspondent providing counsel and maintaining the network of former senior officials communicating with Clinton.`,
+    connections: ['hillary-clinton'],
+    emailAliases: ['Madeleine Albright', 'M. Albright']
+  },
+  {
+    id: 'colin-powell',
+    name: 'Colin Powell',
+    aliases: [],
+    title: 'Former Secretary of State (2001–2005)',
+    category: 'political',
+    tag: 'tag-political',
+    tagLabel: 'Political',
+    bio: `Colin Luther Powell (1937–2021) served as the 65th U.S. Secretary of State (2001–2005) and previously as Chairman of the Joint Chiefs of Staff.`,
+    relevance: `Powell admitted to advising Clinton on personal email use. In later released emails, Powell wrote to Clinton that he used a personal AOL account and his own laptop for email during his tenure, though he did not use a private server. Clinton's team later cited Powell's precedent as justification, which Powell found frustrating—saying they were trying to "pin it on me."`,
+    connections: ['hillary-clinton'],
+    emailAliases: ['Colin Powell']
+  }
+];
+
+const CATEGORY_META = {
+  'inner-circle': { label: 'Inner Circle', color: '#c5221f' },
+  'state-dept': { label: 'State Department', color: '#1967d2' },
+  'political': { label: 'Political / White House', color: '#137333' },
+  'external': { label: 'External Advisors & Staff', color: '#e37400' },
+  'family': { label: 'Family', color: '#8430ce' },
+  'foreign': { label: 'Foreign / Diplomatic', color: '#c62828' },
+  'legal': { label: 'Investigation / Legal', color: '#4e342e' }
+};
+
+let activeCatFilter = null;
+let emailData = [];
+
+function init() {
+  fetch('emails.json').then(r => r.json()).then(data => {
+    emailData = data;
+    countEmails();
+    renderStats();
+    renderCatFilters();
+    renderTOC();
+    renderPeople();
+  });
+}
+
+function countEmails() {
+  PEOPLE.forEach(p => {
+    let count = 0;
+    const aliases = (p.emailAliases || []).map(a => a.toLowerCase());
+    emailData.forEach(e => {
+      const fields = [e.MetadataFrom, e.MetadataTo, e.ExtractedFrom, e.ExtractedTo, e.ExtractedCc].map(f => (f||'').toLowerCase());
+      const combined = fields.join(' ');
+      if (aliases.some(a => combined.includes(a))) count++;
+    });
+    p.emailCount = count;
+  });
+}
+
+function renderStats() {
+  const cats = {};
+  PEOPLE.forEach(p => { cats[p.category] = (cats[p.category]||0) + 1; });
+  const totalEmails = PEOPLE.reduce((s, p) => s + (p.emailCount || 0), 0);
+  document.getElementById('statsBar').innerHTML = `
+    <div class="stat"><div class="stat-num">${PEOPLE.length}</div><div class="stat-label">People Profiled</div></div>
+    <div class="stat"><div class="stat-num">${Object.keys(cats).length}</div><div class="stat-label">Categories</div></div>
+    <div class="stat"><div class="stat-num">${emailData.length.toLocaleString()}</div><div class="stat-label">Emails in Archive</div></div>
+    <div class="stat"><div class="stat-num">${totalEmails.toLocaleString()}</div><div class="stat-label">Person-Email Matches</div></div>
+  `;
+}
+
+function renderCatFilters() {
+  const el = document.getElementById('catFilters');
+  el.innerHTML = `<div class="cat-pill ${!activeCatFilter ? 'active' : ''}" onclick="setCatFilter(null)">All</div>` +
+    Object.entries(CATEGORY_META).map(([key, meta]) =>
+      `<div class="cat-pill ${activeCatFilter === key ? 'active' : ''}" onclick="setCatFilter('${key}')">${meta.label}</div>`
+    ).join('');
+}
+
+function setCatFilter(cat) {
+  activeCatFilter = cat;
+  renderCatFilters();
+  renderTOC();
+  renderPeople();
+}
+
+function getVisiblePeople() {
+  let list = PEOPLE;
+  if (activeCatFilter) list = list.filter(p => p.category === activeCatFilter);
+  const q = (document.getElementById('tocFilter').value || '').toLowerCase();
+  if (q) list = list.filter(p => p.name.toLowerCase().includes(q) || (p.title||'').toLowerCase().includes(q));
+  return list;
+}
+
+function renderTOC() {
+  const visible = getVisiblePeople();
+  const grouped = {};
+  visible.forEach(p => {
+    const cat = p.category;
+    if (!grouped[cat]) grouped[cat] = [];
+    grouped[cat].push(p);
+  });
+
+  let html = '';
+  for (const [cat, people] of Object.entries(grouped)) {
+    const meta = CATEGORY_META[cat] || { label: cat };
+    html += `<li class="toc-h2" style="color:${meta.color}">${meta.label}</li>`;
+    people.forEach(p => {
+      html += `<li><a href="#${p.id}" onclick="openCard('${p.id}')">${p.name}</a></li>`;
+    });
+  }
+  document.getElementById('tocList').innerHTML = html;
+}
+
+function filterPeople() {
+  renderTOC();
+  renderPeople();
+}
+
+const avatarColors = ['#a142f4','#1a73e8','#ea4335','#34a853','#fa7b17','#f538a0','#00897b','#e37400','#c62828','#4e342e'];
+function getColor(name) {
+  let h = 0;
+  for (let i = 0; i < name.length; i++) h = ((h << 5) - h) + name.charCodeAt(i);
+  return avatarColors[Math.abs(h) % avatarColors.length];
+}
+function getInitials(name) {
+  const parts = name.split(/\s+/);
+  return parts.length >= 2 ? (parts[0][0] + parts[parts.length-1][0]).toUpperCase() : name.substring(0,2).toUpperCase();
+}
+function escHtml(s) { const d = document.createElement('div'); d.textContent = s; return d.innerHTML; }
+
+function renderPeople() {
+  const visible = getVisiblePeople();
+  const grouped = {};
+  visible.forEach(p => {
+    if (!grouped[p.category]) grouped[p.category] = [];
+    grouped[p.category].push(p);
+  });
+
+  let html = '';
+  for (const [cat, people] of Object.entries(grouped)) {
+    const meta = CATEGORY_META[cat] || { label: cat };
+    html += `<h2 id="cat-${cat}" style="color:${meta.color}">${meta.label}</h2>`;
+    people.sort((a, b) => (b.emailCount||0) - (a.emailCount||0));
+    people.forEach(p => {
+      const connections = (p.connections || []).map(cid => {
+        const cp = PEOPLE.find(x => x.id === cid);
+        return cp ? `<a href="#${cid}" onclick="openCard('${cid}')">${cp.name}</a>` : '';
+      }).filter(Boolean).join(' &middot; ');
+
+      const aliases = (p.aliases || []).length > 0
+        ? `<p><span class="field-label">Known aliases:</span> ${p.aliases.join(', ')}</p>` : '';
+
+      html += `
+        <div class="person-card" id="${p.id}">
+          <div class="person-card-header" onclick="toggleCard('${p.id}')">
+            <div class="person-avatar" style="background:${getColor(p.name)}">${getInitials(p.name)}</div>
+            <div>
+              <div class="person-name">${escHtml(p.name)}</div>
+              <div class="person-title">${escHtml(p.title)}</div>
+            </div>
+            <div class="person-email-count">${p.emailCount || 0} emails</div>
+          </div>
+          <div class="person-card-body">
+            <div class="person-tags">
+              <span class="person-tag ${p.tag}">${p.tagLabel}</span>
+            </div>
+            ${aliases}
+            <p><span class="field-label">Biography:</span> ${escHtml(p.bio)}</p>
+            <p><span class="field-label">Relevance to Investigations:</span> ${escHtml(p.relevance)}</p>
+            ${connections ? `<div class="rel-section"><h4>Key Connections</h4><div class="rel-list">${connections}</div></div>` : ''}
+          </div>
+        </div>`;
+    });
+  }
+  document.getElementById('wikiContent').innerHTML = html;
+}
+
+function toggleCard(id) {
+  document.getElementById(id).classList.toggle('open');
+}
+
+function openCard(id) {
+  const el = document.getElementById(id);
+  if (!el) return;
+  el.classList.add('open');
+  el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+
+init();
+</script>
+</body>
+</html>
